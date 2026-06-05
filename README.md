@@ -14,24 +14,32 @@ A comprehensive single-page application for calculating all 13 taxes in the King
 - **Responsive Design** — Mobile-friendly with hamburger menu
 - **Animations** — Page transitions, card hover effects, staggered stat reveals
 
-## Taxes Covered
+##  Tax Calculators Included
 
-| # | Tax | Rate |
-|---|-----|------|
-| 1 | Salary Tax | 0%–20% |
-| 2 | Prepayment Tax | 1% |
-| 3 | VAT | 10% |
-| 4 | Special Tax | 3%–35% |
-| 5 | Withholding Tax | 4%–15% |
-| 6 | Public Lighting Tax | 5% |
-| 7 | Accommodation Tax | 2% |
-| 8 | Dividend Tax | 15% |
-| 9 | Minimum Tax | 0.1% |
-| 10 | Rent & Land Tax | 10% |
-| 11 | Land Transfer Tax | 4% |
-| 12 | Property Tax | 0.1%–1% |
-| 13 | Stamp Tax | 0.1%–1% |
+### National Taxes (ថវិការថ្នាក់ជាតិ)
 
+| # | Tax Name | Khmer | Rate | Formula |
+|---|----------|-------|------|---------|
+| 1 | Salary Tax | ពន្ធលើប្រាក់បៀវត្ស | 0% – 20% | Progressive brackets − dependant deductions |
+| 2 | Prepayment Tax | ប្រាក់រំដោះពន្ធ | 1% | Revenue ÷ 1.1 × 1% |
+| 3 | VAT | អាករលើតម្លៃបន្ថែម | 10% | Output VAT − Input VAT |
+| 4 | Special Tax | អាករពិសេស | 3% – 35% | Tax Base × Rate (3 methods) |
+| 5 | Withholding Tax | ពន្ធកាត់ទុក | 4% – 15% | Gross Payment × Rate |
+| 6 | Dividend Tax | ពន្ធលទ្ធផល | 15% | Dividend Amount × 15% |
+| 7 | Minimum Tax | ពន្ធអប្បបរមា | 0.1% | Annual Revenue × 0.1% |
+| 8 | Rent and Land Tax | ពន្ធអាជីវកម្មនិងដី | 10% | Rental Income × 10% |
+| 9 | Land Transfer Tax | ពន្ធបំលែងដី | 4% | Sale Price × 4% |
+| 10 | Property Tax | ពន្ធអចលនទ្រព្យ | 0.1% – 1% | Property Value × Rate |
+| 11 | Stamp Tax | ពន្ធស្លាកសម្គាល់ | 0.1% – 1% | Document Value × Rate |
+
+### Sub-national Taxes (ថវិការថ្នាក់ក្រោមជាតិ)
+
+| # | Tax Name | Khmer | Rate | Formula |
+|---|----------|-------|------|---------|
+| 12 | Public Lighting Tax | ពន្ធអំពីភ្លើងសាធារណៈ | 5% | (Sales ÷ 1.10) ÷ 1.05 × 5% |
+| 13 | Accommodation Tax | អាករលើការស្នាក់នៅ | 2% | Invoice ÷ 1.10 × 2% |
+
+---
 ## Tech Stack
 
 - **React 18** — UI framework
