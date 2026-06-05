@@ -3,6 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/tax_calcalate/',
   server: { port: 3000, host: true },
 })
