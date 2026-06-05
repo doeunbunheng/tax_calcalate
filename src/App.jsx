@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { T, TAXES, CATEGORIES, gold, gold2, navy, card, muted, white, border, red, green } from "./data.js";
 import { Row, Table, OverviewTab, SalaryTab, PrepaymentTab, VATTab, SpecialTab, WHTTab, PublicLightingTab, AccommodationTab, DividendTab, MinimumTaxTab, RentLandTab, LandTransferTab, PropertyTaxTab, StampTaxTab } from "./tabs.jsx";
 
+const BASE = import.meta.env.BASE_URL || "/";
+
 // ── Router ──────────────────────────────────────────────
 function useRouter() {
   const [hash, setHash] = useState(window.location.hash || "#/");
@@ -445,15 +447,15 @@ export default function CambodiaTaxCalculator() {
             className="mobile-only" onClick={() => setMenuOpen(o => !o)}>
             {menuOpen ? "✕" : "☰"}
           </button>
-          <img src="/logo_GDOT.png" alt="GDT" style={logoImg} onError={e => e.target.style.display="none"} className="logo-lg" />
-          <img src="/logo_GDOT.png" alt="GDT" style={logoImgMob} onError={e => e.target.style.display="none"} className="logo-sm" />
+          <img src={BASE + "logo_GDOT.png"} alt="GDT" style={logoImg} onError={e => e.target.style.display="none"} className="logo-lg" />
+          <img src={BASE + "logo_GDOT.png"} alt="GDT" style={logoImgMob} onError={e => e.target.style.display="none"} className="logo-sm" />
           <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { navigate("#/"); setMenuOpen(false); }}>
             <div style={{ color: muted, fontSize: "0.85rem", fontWeight: 600, lineHeight: 1.2 }}>ម៉ាសុីនគិតពន្ធនៃព្រះរាជាណាចក្រកម្ពុជា</div>
             <div style={{ color: gold, fontWeight: 700, fontSize: "0.95rem" }}>{T[lang].appTitle}</div>
             <div style={{ color: muted, fontSize: "0.7rem" }}>{T[lang].appSub}</div>
           </div>
-          <img src="/logo_ITC.png" alt="ITC" style={{ ...logoImg, background: "white" }} onError={e => e.target.style.display="none"} className="logo-lg" />
-          <img src="/logo_ITC.png" alt="ITC" style={{ ...logoImgMob, background: "white" }} onError={e => e.target.style.display="none"} className="logo-sm" />
+          <img src={BASE + "logo_ITC.png"} alt="ITC" style={{ ...logoImg, background: "white" }} onError={e => e.target.style.display="none"} className="logo-lg" />
+          <img src={BASE + "logo_ITC.png"} alt="ITC" style={{ ...logoImgMob, background: "white" }} onError={e => e.target.style.display="none"} className="logo-sm" />
           <div style={{ position: "absolute", right: 12, top: 6, display: "flex", gap: 4, alignItems: "center" }}>
             <span className="desktop-only" style={{ background: "rgba(212,168,67,0.12)", border: `1px solid ${border}`, color: gold, padding: "2px 8px", borderRadius: 20, fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap" }}>{T[lang].taxes13}</span>
             <button style={langBtn(lang === "en")} onClick={() => setLang("en")}>EN</button>
