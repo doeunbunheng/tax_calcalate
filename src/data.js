@@ -12,6 +12,7 @@ export const T = {
       lighting: "Public Lighting Tax", accommodation: "Accommodation Tax",
       dividend: "Dividend Tax", minimum: "Minimum Tax", rent: "Rent & Land Tax",
       landtransfer: "Land Transfer Tax", property: "Property Tax", stamp: "Stamp Tax",
+      annual: "Annual Tax & Prepayment",
     },
     nav: { home: "Home", about: "About Taxes", allTaxes: "All Taxes", calculator: "Calculator" },
     home: {
@@ -141,10 +142,24 @@ export const T = {
       formula: "Formula", formulaVal: "Base = Revenue / 1.1 → Tax = Base × 1%",
       whoPays: "Who Pays", whoPaysVal: "Enterprises registered for VAT.",
       due: "Due", dueVal: "1st–20th of following month.",
-      calcTitle: "Prepayment Tax", revenueLabel: "Total Revenue Including VAT (KHR)",
-      calcBtn: "Calculate", revenueRow: "Revenue (incl. VAT)",
-      baseRow: "Tax Base (/ 1.10)", taxRow: "Prepayment Tax (1%)",
-      creditRow: "Credit Against Profit Tax",
+      calcTitle: "Prepayment Tax",
+      monthLabels: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      monthCol: "Month", revenueCol: "Revenue (incl. VAT)", baseCol: "Base (/1.10)",
+      prepaymentCol: "Prepayment (1%)",
+      totalRow: "Total",
+      expensesLabel: "Total Annual Expenses (KHR)",
+      calcBtn: "Calculate Annual Tax",
+      annualTitle: "Annual Tax Summary",
+      netProfit: "Annual Net Profit",
+      profitStatus: "Company has profit",
+      lossStatus: "Company has loss",
+      incomeTax: "Income Tax (20% of profit)",
+      minimumTax: "Minimum Tax (1% of base)",
+      finalPayable: "Final Tax Payable (after prepayment credit)",
+      minTaxApplied: "Minimum Tax applies because company has loss",
+      profitTaxApplied: "Income Tax applies because company has profit",
+      creditNote: "These monthly prepayments are credited against your annual profit tax liability.",
+      exampleNote: "If total annual revenue = 110,000,000 KHR (incl. VAT):",
     },
     vat: {
       title: "VAT Calculator", sub: "Value Added Tax — 10% on taxable supplies.",
@@ -171,6 +186,35 @@ export const T = {
       exemptions: "Exempt: insurance premiums, interest on NSSF, qualifying bonds.",
       dueNote: "Due: 15th of following month. File monthly return.",
     },
+    annual: {
+      title: "Annual Tax & Prepayment Calculator",
+      sub: "Calculate annual tax liability with monthly income inputs, expenses, and minimum tax logic.",
+      formula: "Formula", formulaVal: "Annual Net Profit = Total Revenue − Total Expenses → Tax = Max(Income Tax, Minimum Tax) − Prepayment Credits",
+      whoPays: "Who Pays", whoPaysVal: "Enterprises subject to annual profit tax and prepayment tax.",
+      due: "Due", dueVal: "Annual filing. Prepayment due 1st–20th of following month.",
+      calcTitle: "Annual Tax & Prepayment Calculator",
+      includesVAT: "Include VAT in Revenue",
+      yesVAT: "Yes (revenue includes 10% VAT)",
+      revenue: "Monthly Revenue (KHR)",
+      expenses: "Annual Expenses (KHR)",
+      monthLabels: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      calcBtn: "Calculate Annual Tax",
+      monthCol: "Month", revenueCol: "Revenue", baseCol: "Base (/1.10)",
+      prepaymentCol: "Prepayment (1%)",
+      summaryTitle: "Annual Summary",
+      totalRevenue: "Total Revenue",
+      totalBase: "Total Base",
+      netProfit: "Annual Net Profit",
+      incomeTax: "Income Tax (20% of profit)",
+      minimumTax: "Minimum Tax (1% of base)",
+      finalTax: "Final Tax Payable",
+      prepaymentCredit: "Less: Prepayment Credits",
+      netPayableEnd: "Net Payable at Year-End",
+      statusLoss: "Company has loss. Income tax = 0. Minimum tax applies.",
+      statusIncomeHigher: "Income tax is higher than minimum tax.",
+      statusMinHigher: "Minimum tax is higher than income tax.",
+      notes: "If annual net profit is negative, you only pay Minimum Tax (1% of total base).",
+    },
   },
   kh: {
     appTitle: "ម៉ាស៊ីនគិតពន្ធកម្ពុជា",
@@ -179,9 +223,10 @@ export const T = {
     tabs: {
       overview: "ទិដ្ឋភាពទូទៅ", salary: "ពន្ធបៀវត្ស", prepayment: "ប្រាក់រំដោះពន្ធ",
       vat: "អាករ VAT", special: "អាករពិសេស", withholding: "ពន្ធកាត់ទុក",
-      lighting: "ពន្ធភ្លើងសាធារណៈ", accommodation: "អាករស្នាក់នៅ",
+      lighting: "ពន្ធបំភ្លឺសាធារណៈ", accommodation: "អាករស្នាក់នៅ",
       dividend: "ពន្ធភាគលាភ", minimum: "ពន្ធអប្បបរមា", rent: "ពន្ធជួលដី",
       landtransfer: "ពន្ធផ្ទេរដី", property: "ពន្ធអចលនទ្រព្យ", stamp: "ពន្ធប្រថាប់ត្រា",
+      annual: "ពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ",
     },
     nav: { home: "ទំព័រដើម", about: "អំពីពន្ធ", allTaxes: "ពន្ធទាំងអស់", calculator: "ម៉ាស៊ីនគិតពន្ធ" },
     home: {
@@ -216,7 +261,7 @@ export const T = {
       cat1Title: "ពន្ធលើចំណូល",
       cat1Desc: "ពន្ធលើចំណូលបុគ្គល និងអាជីវកម្ម រួមមានពន្ធបៀវត្ស ពន្ធភាគលាភ និងពន្ធអប្បបរមា។",
       cat2Title: "ពន្ធប្រយោដន",
-      cat2Desc: "ពន្ធលើទំនិញ និងសេវា រួមមាន VAT អាករពិសេស ពន្ធភ្លើងសាធារណៈ និងអាករស្នាក់នៅ។",
+      cat2Desc: "ពន្ធលើទំនិញ និងសេវា រួមមាន VAT អាករពិសេស ពន្ធបំភ្លឺសាធារណៈ និងអាករស្នាក់នៅ។",
       cat3Title: "ពន្ធលើប្រតិបត្តិការ",
       cat3Desc: "ពន្ធលើអចលនទ្រព្យ និងប្រតិបត្តិការសកម្មភាព រួមមានពន្ធផ្ទេរដី ពន្ធអចលនទ្រព្យ ពន្ធប្រថាប់ត្រា និងពន្ធលើប្រាក់ជួល។",
       cat4Title: "ពន្ធបង់ជាមុន និងកាត់ទុក",
@@ -280,7 +325,7 @@ export const T = {
       whoPayS: "អ្នកបង់ពន្ធ",
     },
     salary: {
-      title: "ម៉ាស៊ីនគិតពន្ធបៀវត្ស", sub: "គណនាពន្ធបៀវត្សតាមជាន់ថ្នាក់ ជាមួយការដកណ និងអត្ថប្រយោជន៍។",
+      title: "ម៉ាស៊ីនគិតពន្ធបៀវត្ស",       sub: "គណនាពន្ធបៀវត្សតាមជាន់ថ្នាក់ ជាមួយការដកចំនួនបន្ទុក និងអត្ថប្រយោជន៍។",
       whoPays: "អ្នកបង់", whoPaysVal: "និយោជកកាត់ទុកពីប្រាក់ខែនិយោជិត។",
       resident: "និវាសនជន", residentVal: "០%–២០% តាមជាន់ថ្នាក់។ ដក ១៥០,០០០ ក្នុងម្នាក់។",
       nonResident: "អនិវាសនជន", nonResidentVal: "អត្រាថេរ ២០% គ្មានការដក។",
@@ -311,10 +356,24 @@ export const T = {
       formula: "រូបមន្ត", formulaVal: "Base = ចំណូល / ១.១ → ពន្ធ = Base × ១%",
       whoPays: "អ្នកបង់", whoPaysVal: "សហគ្រាសដែលបានចុះ VAT ។",
       due: "កាលបរិច្ឆេទ", dueVal: "ថ្ងៃទី ១–២០ នៃខែបន្ទាប់។",
-      calcTitle: "ប្រាក់រំដោះពន្ធ", revenueLabel: "ចំណូលសរុបរួមទាំង VAT (រៀល)",
-      calcBtn: "គណនា", revenueRow: "ចំណូល (រួម VAT)",
-      baseRow: "មូលដ្ឋាន (/ ១.១០)", taxRow: "ពន្ធ (១%)",
-      creditRow: "ឥណទានទល់នឹងពន្ធចំណេញ",
+      calcTitle: "ប្រាក់រំដោះពន្ធ",
+      monthLabels: ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"],
+      monthCol: "ខែ", revenueCol: "ចំណូល (រួម VAT)", baseCol: "មូលដ្ឋាន (/១.១០)",
+      prepaymentCol: "រំដោះពន្ធ (១%)",
+      totalRow: "សរុប",
+      expensesLabel: "ចំណាយប្រចាំឆ្នាំសរុប (រៀល)",
+      calcBtn: "គណនាពន្ធប្រចាំឆ្នាំ",
+      annualTitle: "សង្ខេបពន្ធប្រចាំឆ្នាំ",
+      netProfit: "ប្រាក់ចំណេញសុទ្ធ",
+      profitStatus: "ក្រុមហ៊ុនមានប្រាក់ចំណេញ",
+      lossStatus: "ក្រុមហ៊ុនខាតបង់",
+      incomeTax: "ពន្ធចំណេញ (២០% នៃប្រាក់ចំណេញ)",
+      minimumTax: "ពន្ធអប្បបរមា (១% នៃមូលដ្ឋាន)",
+      finalPayable: "ពន្ធដែលត្រូវបង់ (បន្ទាប់ពីដកឥណទាន)",
+      minTaxApplied: "អនុវត្តពន្ធអប្បបរមា ដោយសារក្រុមហ៊ុនខាតបង់",
+      profitTaxApplied: "អនុវត្តពន្ធចំណេញ ដោយសារក្រុមហ៊ុនមានប្រាក់ចំណេញ",
+      creditNote: "ប្រាក់រំដោះពន្ធប្រចាំខែទាំងនេះត្រូវបានដកពីពន្ធចំណេញប្រចាំឆ្នាំរបស់អ្នក។",
+      exampleNote: "ប្រសិនបើចំណូលសរុប = ១១០,០០០,០០០ រៀល (រួម VAT):",
     },
     vat: {
       title: "ម៉ាស៊ីនគិត VAT", sub: "អាករលើតម្លៃបន្ថែម — ១០% លើការផ្គត់ផ្គង់។",
@@ -340,6 +399,35 @@ export const T = {
       residents: "និវាសនជន", nonResidents: "អនិវាសនជន",
       exemptions: "លើកលែង: បុព្វលាភធានារ៉ាប់រង NSSF និងសញ្ញាប័ណ្ណគុណភាព។",
       dueNote: "កំណត់: ថ្ងៃទី ១៥ នៃខែបន្ទាប់។",
+    },
+    annual: {
+      title: "ម៉ាស៊ីនគិតពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ",
+      sub: "គណនាពន្ធប្រចាំឆ្នាំដោយបញ្ចូលចំណូលប្រចាំខែ ចំណាយ និងពន្ធអប្បបរមា។",
+      formula: "រូបមន្ត", formulaVal: "ប្រាក់ចំណេញ = ចំណូលសរុប − ចំណាយសរុប → ពន្ធ = Max(ពន្ធចំណេញ, ពន្ធអប្បបរមា) − ឥណទាន",
+      whoPays: "អ្នកបង់", whoPaysVal: "សហគ្រាសដែលត្រូវបង់ពន្ធចំណេញ និងរំដោះពន្ធ។",
+      due: "កាលបរិច្ឆេទ", dueVal: "ប្រចាំឆ្នាំ។ រំដោះពន្ធ ថ្ងៃទី ១–២០ បន្ទាប់ពីចុងខែ។",
+      calcTitle: "ម៉ាស៊ីនគិតពន្ធប្រចាំឆ្នាំ",
+      includesVAT: "រួម VAT ក្នុងចំណូល",
+      yesVAT: "បាទ/ចាស (ចំណូលរួម VAT ១០%)",
+      revenue: "ចំណូលប្រចាំខែ (រៀល)",
+      expenses: "ចំណាយប្រចាំឆ្នាំ (រៀល)",
+      monthLabels: ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"],
+      calcBtn: "គណនាពន្ធប្រចាំឆ្នាំ",
+      monthCol: "ខែ", revenueCol: "ចំណូល", baseCol: "មូលដ្ឋាន (/១.១០)",
+      prepaymentCol: "រំដោះពន្ធ (១%)",
+      summaryTitle: "សង្ខេបប្រចាំឆ្នាំ",
+      totalRevenue: "ចំណូលសរុប",
+      totalBase: "មូលដ្ឋានសរុប",
+      netProfit: "ប្រាក់ចំណេញសុទ្ធ",
+      incomeTax: "ពន្ធចំណេញ (២០%)",
+      minimumTax: "ពន្ធអប្បបរមា (១%)",
+      finalTax: "ពន្ធដែលត្រូវបង់",
+      prepaymentCredit: "ដក៖ ឥណទានរំដោះពន្ធ",
+      netPayableEnd: "ត្រូវបង់ចុងឆ្នាំ",
+      statusLoss: "ក្រុមហ៊ុនខាតបង់។ ពន្ធចំណេញ = ០។ អនុវត្តពន្ធអប្បបរមា។",
+      statusIncomeHigher: "ពន្ធចំណេញខ្ពស់ជាងពន្ធអប្បបរមា។",
+      statusMinHigher: "ពន្ធអប្បបរមាខ្ពស់ជាងពន្ធចំណេញ។",
+      notes: "ប្រសិនបើប្រាក់ចំណេញសុទ្ធអវិជ្ជមាន អ្នកបង់តែពន្ធអប្បបរមា ១% នៃមូលដ្ឋានសរុប។",
     },
   },
 };
@@ -378,40 +466,121 @@ export function calcSpecialFirstSeller(p, r)  { const base = (p/1.10)/1.05; retu
 export function calcSpecialReseller(p)        { const base = ((p/1.10)/1.05)*0.20; return { base, tax: base*0.05 }; }
 export function calcSpecialLocal(p, r)        { const base = 0.90*(p/1.10/(1+r)); return { base, tax: base*r }; }
 export function calcWHT(g, r)              { const wht = g*(r/100); return { wht, net: g-wht }; }
-export function calcLighting(p)            { const base = (p/1.10)/1.05; return { base, tax: base*0.05 }; }
+export function calcLighting(p, mode = "retailer") { const base = (p/1.10)/1.05; const taxableBase = mode === "producer" ? base * 0.20 : base; return { base, taxableBase, tax: taxableBase * 0.05 }; }
 export function calcAccom(p)               { const base = p/1.10; return { base, tax: base*0.02 }; }
-export function calcDividend(a)            { const tax = a*0.15; return { tax, net: a-tax }; }
-export function calcMinTax(r)              { return { tax: r*0.001 }; }
+export function calcDividend(a, rate = 0.15) { const tax = a * (rate / 100); return { tax, net: a - tax }; }
+export function calcMinTax(r)              { return { tax: r*0.01 }; }
 export function calcRent(i)                { const tax = i*0.10; return { tax, net: i-tax }; }
 export function calcLandTransfer(v)        { return { tax: v*0.04 }; }
 export function calcPropertyTax(v, r)      { return { tax: v*(r/100) }; }
 export function calcStampTax(v, r)         { return { tax: v*(r/100) }; }
+export function calculateAdvancedPrepaymentTax({
+  monthlyIncomes,
+  annualNetProfit,
+  incomeTaxRate = 0.20,
+  includesVAT = true
+}) {
+  if (!Array.isArray(monthlyIncomes) || monthlyIncomes.length === 0) {
+    return { error: "Please input monthly incomes" };
+  }
+  const profit = Number(annualNetProfit);
+  if (isNaN(profit)) {
+    return { error: "Annual net profit must be a valid number" };
+  }
+  const monthlyResults = monthlyIncomes.map((income, index) => {
+    const revenue = Number(income);
+    if (isNaN(revenue) || revenue < 0) {
+      return { month: index + 1, error: "Invalid monthly income" };
+    }
+    const base = includesVAT ? revenue / 1.10 : revenue;
+    const prepaymentTax = base * 0.01;
+    return { month: index + 1, revenue, base, prepaymentTax };
+  });
+  const hasError = monthlyResults.some(item => item.error);
+  if (hasError) {
+    return { error: "Some monthly income values are invalid", monthlyResults };
+  }
+  const totalRevenue = monthlyResults.reduce((sum, item) => sum + item.revenue, 0);
+  const totalBase = monthlyResults.reduce((sum, item) => sum + item.base, 0);
+  const totalPrepaymentTax = monthlyResults.reduce((sum, item) => sum + item.prepaymentTax, 0);
+  const incomeTax = profit > 0 ? profit * incomeTaxRate : 0;
+  const minimumTax = totalBase * 0.01;
+  const finalTaxBeforeCredit = Math.max(incomeTax, minimumTax);
+  const finalPayable = finalTaxBeforeCredit - totalPrepaymentTax;
+  let status = "";
+  if (profit < 0) {
+    status = "Company has loss, so income tax is 0. Minimum tax applies.";
+  } else if (incomeTax > minimumTax) {
+    status = "Income tax is higher than minimum tax.";
+  } else {
+    status = "Minimum tax is higher than income tax.";
+  }
+  return {
+    monthlyResults,
+    summary: {
+      totalRevenue, totalBase, annualNetProfit: profit,
+      incomeTaxRate: incomeTaxRate * 100 + "%", incomeTax, minimumTax,
+      totalPrepaymentTax, finalTaxBeforeCredit, finalPayable, status
+    }
+  };
+}
+export function calculateAnnualNetProfit(monthlyIncomes, annualExpenses, includesVAT = true) {
+  const incomes = monthlyIncomes.map(v => parseFloat(v) || 0);
+  const expenses = parseFloat(annualExpenses) || 0;
+  const totalRevenue = incomes.reduce((s, v) => s + v, 0);
+  const netProfit = totalRevenue - expenses;
+  return calculateAdvancedPrepaymentTax({ monthlyIncomes: incomes, annualNetProfit: netProfit, includesVAT });
+}
+export function calcSpecialLocalBase(p, r) { const base = (p/1.10)/(1+r); return { base, tax: base*r }; }
+export function calcSpecialProducer(p, r) { const base = 0.90*(p/1.10/(1+r)); return { base, tax: base*r }; }
+export function calcSpecialImport(cif, duty, r) { const base = cif + (parseFloat(duty)||0); return { base, tax: base*r }; }
+export function calcCorporateIncomeTax(p) { const tax = p*0.20; return { tax, rate:20, net: p-tax }; }
+export function calcNaturalResourceTax(p) { const tax = p*0.30; return { tax, rate:30 }; }
+export function calcQIPTax(p) { return { tax:0, rate:0 }; }
+export function calcInsuranceTax(g, t) { const rate = t==="property"?0.05:0.20; return { tax: g*rate, rate:rate*100 }; }
+export function calcProgressiveIndividualTax(p) {
+  let tax, bracket;
+  if (p<=18000000) { tax=0; bracket=0; }
+  else if (p<=24000000) { tax=p*0.05-900000; bracket=1; }
+  else if (p<=102000000) { tax=p*0.10-2100000; bracket=2; }
+  else if (p<=150000000) { tax=p*0.15-7200000; bracket=3; }
+  else { tax=p*0.20-14200000; bracket=4; }
+  return { tax: Math.max(0, tax), bracket, rate: bracket===0?0:bracket===1?5:bracket===2?10:bracket===3?15:20, net: p - Math.max(0, tax) };
+}
+export function calcTaxableIncome(accountingProfit, nonDeductible, taxableNotRecorded, deductibleNotRecorded, nonTaxableRecorded) {
+  const taxable = accountingProfit + (nonDeductible||0) + (taxableNotRecorded||0) - (deductibleNotRecorded||0) - (nonTaxableRecorded||0);
+  return { taxable: Math.max(0, taxable), disallowed: nonDeductible||0, exempt: nonTaxableRecorded||0 };
+}
 
 export const fmt = (n) => Math.round(n || 0).toLocaleString("en-US") + " ៛";
 
-// ═══════════════════════════════════════════════════════════
-// TAX METADATA
-// ═══════════════════════════════════════════════════════════
 export const TAXES = [
-  { id: "salary", en: "Salary Tax", kh: "ពន្ធលើប្រាក់បៀវត្ស", cat: "income", icon: "", rate: "0%–20%", due: "20th of following month", formulaEn: "Taxable = Gross − (Deps × 150,000) → Tax = Taxable × Rate − Offset", formulaKh: "ជាប់ពន្ធ = ប្រាក់ − (ណ × ១៥០,០០០) → ពន្ធ = ជាប់ × អត្រា", defEn: "Monthly progressive tax withheld by employer. Residents: 0%–20% with dependant deductions. Non-residents: flat 20%.", defKh: "ពន្ធប្រចាំខែ ០%–២០%។ ដក ១៥០,០០០ ៛ ក្នុង ១ ណ។ អនិវាសនជន ២០% ថេរ។" },
-  { id: "prepayment", en: "Prepayment Tax", kh: "ប្រាក់រំដោះពន្ធ", cat: "advance", icon: "", rate: "1%", due: "1st–20th of following month", formulaEn: "Base = Revenue / 1.1 → Tax = Base × 1%", formulaKh: "Base = ចំណូល / ១.១ → ពន្ធ = Base × ១%", defEn: "Monthly 1% advance credited against annual profit tax.", defKh: "ពន្ធ ១% ប្រចាំខែ ដើម្បីរំដោះពន្ធចំណេញ។" },
-  { id: "vat", en: "VAT", kh: "អាករលើតម្លៃបន្ថែម", cat: "indirect", icon: "", rate: "10%", due: "20th of following month", formulaEn: "Net VAT = Output VAT − Input VAT", formulaKh: "VAT = Output − Input", defEn: "10% on taxable supplies. Net VAT = Output VAT minus Input VAT.", defKh: "១០% លើការផ្គត់ផ្គង់ជាប់អាករ។ VAT សុទ្ធ = Output − Input។" },
-  { id: "special", en: "Special Tax", kh: "អាករពិសេស", cat: "indirect", icon: "", rate: "3%–35%", due: "20th of following month", formulaEn: "Base × Rate (3 calculation methods)", formulaKh: "Base × អត្រា (៣ វិធីគណនា)", defEn: "Excise tax on alcohol (35%), beer (30%), cigarettes (20%), soft drinks (10%), cement (5%), services (3–10%).", defKh: "ស្រា ៣៥%, បៀរ ៣០%, បារី ២០%, ភេសជ្ជៈ ១០%, ស៊ីម៉ង់ ៥%, សេវា ៣%–១០%។" },
-  { id: "withholding", en: "Withholding Tax", kh: "ពន្ធកាត់ទុក", cat: "advance", icon: "", rate: "4%–15%", due: "15th of following month", formulaEn: "WHT = Gross × Rate", formulaKh: "ពន្ធ = ប្រាក់ × អត្រា", defEn: "Deducted at source: Services/Royalties/Interest 15%, Rental 10%, Fixed deposit 6%, Non-fixed 4%, Non-resident 14%.", defKh: "កាត់ទុក: សេវា/ការប្រាក់ ១៥%, ជួល ១០%, ប្រាក់ ៦%, ៤%, ១៤%។" },
-  { id: "lighting", en: "Public Lighting Tax", kh: "ពន្ធភ្លើងសាធារណៈ", cat: "indirect", icon: "", rate: "5%", due: "20th of following month", formulaEn: "(Sales / 1.10) / 1.05 × 5%", formulaKh: "(លក់ / ១.១) / ១.០៥ × ៥%", defEn: "5% sub-national tax on goods. Base removes VAT and Special Tax.", defKh: "ពន្ធ ៥% ថ្នាក់ក្រោមជាតិ។ មូលដ្ឋានដក VAT និងអាករពិសេស។" },
-  { id: "accommodation", en: "Accommodation Tax", kh: "អាករស្នាក់នៅ", cat: "indirect", icon: "", rate: "2%", due: "20th of following month", formulaEn: "Invoice / 1.10 × 2%", formulaKh: "វិក្កយបត្រ / ១.១ × ២%", defEn: "2% on hotel and guesthouse room charges.", defKh: "២% លើការស្នាក់នៅ។" },
-  { id: "dividend", en: "Dividend Tax", kh: "ពន្ធភាគលាភ", cat: "income", icon: "", rate: "15%", due: "When distributed", formulaEn: "Dividend × 15%", formulaKh: "ភាគលាភ × ១៥%", defEn: "15% on profit distributed as dividends.", defKh: "១៥% លើភាគលាភ។" },
-  { id: "minimum", en: "Minimum Tax", kh: "ពន្ធអប្បបរមា", cat: "income", icon: "", rate: "0.1%", due: "Annual filing", formulaEn: "Revenue × 0.1% (pay higher of this or Profit Tax)", formulaKh: "ចំណូល × ០.១% (បង់ខ្ពស់ជាងពន្ធចំណេញ)", defEn: "Ensures all enterprises pay at least 0.1% of gross annual revenue.", defKh: "ពន្ធអប្បបរមា ០.១% នៃចំណូលប្រចាំឆ្នាំ។" },
-  { id: "rent", en: "Rent & Land Tax", kh: "ពន្ធជួលដីនិងអចលន", cat: "transaction", icon: "", rate: "10%", due: "Monthly", formulaEn: "Rental Income × 10%", formulaKh: "ប្រាក់ជួល × ១០%", defEn: "10% on rental income from property and land.", defKh: "១០% លើប្រាក់ចំណូលពីការជួល។" },
-  { id: "landtransfer", en: "Land Transfer Tax", kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land or property ownership.", defKh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ។" },
-  { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%–1%", due: "Annual", formulaEn: "Property Value × Rate (0.1%–1%)", formulaKh: "តម្លៃ × អត្រា (០.១%–១%)", defEn: "Annual tax on property value at 0.1% to 1%.", defKh: "ពន្ធប្រចាំឆ្នាំ ០.១% ដល់ ១% លើអចលនទ្រព្យ។" },
-  { id: "stamp", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "0.1%–1%", due: "At execution", formulaEn: "Document Value × Rate (0.1%–1%)", formulaKh: "តម្លៃ × អត្រា (០.១%–១%)", defEn: "0.1% to 1% on official documents, contracts, and transfers.", defKh: "០.១% ដល់ ១% លើឯកសារផ្លូវការ។" },
+  { id: "salary", en: "Salary Tax", kh: "ពន្ធលើប្រាក់បៀវត្ស", cat: "income", icon: "", rate: "0%–20%", due: "20th of following month", formulaEn: "Taxable = Gross − (Deps × 150,000) → Tax = Taxable × Rate − Offset", formulaKh: "ជាប់ពន្ធ = ប្រាក់ − (ចំនួនបន្ទុក × ១៥០,០០០) → ពន្ធ = ជាប់ × អត្រា", defEn: "Monthly progressive tax withheld by employer.", defKh: "ពន្ធលើប្រាក់បៀវត្ស គឺជាពន្ធដែលគិតលើប្រាក់ខែប្រចាំខែរបស់និយោជិត។ និយោជកត្រូវកាត់ពន្ធនេះពីប្រាក់ខែរបស់និយោជិត ហើយបង់ជូនពន្ធដារ។ ពន្ធនេះគិតតាមអត្រាកំណើនជាថ្នាក់ៗ។" },
+  { id: "prepayment", en: "Prepayment Tax", kh: "ប្រាក់រំដោះពន្ធ", cat: "advance", icon: "", rate: "1%", due: "1st–20th of following month", formulaEn: "Base = Revenue / 1.1 → Tax = Base × 1%", formulaKh: "Base = ចំណូល / ១.១ → ពន្ធ = Base × ១%", defEn: "Monthly 1% advance credited against annual profit tax.", defKh: "ប្រាក់រំដោះពន្ធ គឺជាពន្ធដែលសហគ្រាសត្រូវបង់ជាមុនជារៀងរាល់ខែ ដោយគណនាលើផលរបរប្រចាំខែមិនរួមបញ្ចូល VAT។ ពន្ធនេះមិនមែនជា VAT ទេ ប៉ុន្តែជាប្រាក់បង់មុនសម្រាប់កាត់កងជាមួយពន្ធលើប្រាក់ចំណូលប្រចាំឆ្នាំនៅចុងឆ្នាំ។" },
+  { id: "vat", en: "VAT", kh: "អាករលើតម្លៃបន្ថែម", cat: "indirect", icon: "", rate: "10%", due: "20th of following month", formulaEn: "Net VAT = Output VAT − Input VAT", formulaKh: "VAT = Output − Input", defEn: "10% on taxable supplies.", defKh: "VAT ឬ អាករលើតម្លៃបន្ថែម គឺជាអាករដែលគិតលើការលក់ទំនិញ និងសេវាកម្ម។ អត្រាស្តង់ដារគឺ ១០%។ សម្រាប់អាជីវកម្មដែលបានចុះបញ្ជី VAT អាចមាន Output VAT ពេលលក់ និង Input VAT ពេលទិញ។" },
+  { id: "special", en: "Special Tax", kh: "អាករពិសេស", cat: "indirect", icon: "", rate: "3%–35%", due: "20th of following month", formulaEn: "Base × Rate", formulaKh: "Base × អត្រា", defEn: "Excise tax on alcohol, beer, cigarettes, drinks, cement, services.", defKh: "អាករពិសេស គឺជាអាករបន្ថែមដែលគិតលើទំនិញ ឬសេវាកម្មពិសេសមួយចំនួន ដូចជា ស្រា បៀរ បារី ស៊ីហ្គា ភេសជ្ជៈ ស៊ីម៉ង់ត៍ សេវាកម្សាន្ត និងទូរគមនាគមន៍។ អត្រាអាករខុសគ្នាតាមប្រភេទទំនិញ។" },
+  { id: "withholding", en: "Withholding Tax", kh: "ពន្ធកាត់ទុក", cat: "advance", icon: "", rate: "4%–15%", due: "15th of following month", formulaEn: "WHT = Gross × Rate", formulaKh: "ពន្ធ = ប្រាក់ × អត្រា", defEn: "Deducted at source on various payments.", defKh: "ពន្ធកាត់ទុក គឺជាពន្ធដែលអ្នកបង់ប្រាក់ត្រូវកាត់ទុកពីប្រាក់សរុប មុនពេលបង់ទៅឱ្យអ្នកទទួលប្រាក់។ បន្ទាប់មក អ្នកបង់ប្រាក់ត្រូវយកពន្ធដែលបានកាត់ទុកនោះទៅបង់ជូនពន្ធដារ។" },
+  { id: "lighting", en: "Public Lighting Tax", kh: "ពន្ធបំភ្លឺសាធារណៈ", cat: "indirect", icon: "", rate: "5%", due: "20th of following month", formulaEn: "First Seller: Inv/1.10/1.05×5% | Reseller: (Inv/1.10/1.05)×20%×5%", formulaKh: "អ្នកលក់ដំបូង: ថ្លៃ/១.១/១.០៥×៥% | អ្នកលក់លើកទីពីរ: (ថ្លៃ/១.១/១.០៥)×២០%×៥%", defEn: "5% sub-national tax.", defKh: "អាករសម្រាប់បំភ្លឺសាធារណៈ គឺជាអាករដែលគិតលើទំនិញ ឬសេវាកម្មមួយចំនួនដែលមានអាករបន្ថែម ដូចជា ស្រា បៀរ ឬភេសជ្ជៈខ្លះៗ។ អត្រាអាករគឺ ៥%។" },
+  { id: "accommodation", en: "Accommodation Tax", kh: "អាករស្នាក់នៅ", cat: "indirect", icon: "", rate: "2%", due: "20th of following month", formulaEn: "Invoice / 1.10 × 2%", formulaKh: "វិក្កយបត្រ / ១.១ × ២%", defEn: "2% on hotel and guesthouse charges.", defKh: "អាករស្នាក់នៅ គឺជាអាករដែលគិតលើសេវាស្នាក់នៅ ដូចជា សណ្ឋាគារ ផ្ទះសំណាក់ ឬកន្លែងស្នាក់នៅផ្សេងៗ។ វាគណនាលើតម្លៃសេវាស្នាក់នៅមិនរួម VAT។ អត្រា ២%។" },
+  { id: "dividend", en: "Dividend Tax", kh: "ពន្ធភាគលាភ", cat: "income", icon: "", rate: "0%–20%", due: "When distributed", formulaEn: "Dividend × Rate", formulaKh: "ភាគលាភ × អត្រា", defEn: "Tax on profit distributed as dividends.", defKh: "ភាគលាភ គឺជាប្រាក់ ឬទ្រព្យសម្បត្តិដែលក្រុមហ៊ុនចែកឲ្យម្ចាស់ភាគហ៊ុន បន្ទាប់ពីក្រុមហ៊ុនមានប្រាក់ចំណេញ។ ពន្ធភាគលាភ គឺជាពន្ធដែលពាក់ព័ន្ធនឹងការចែកប្រាក់ចំណេញទៅម្ចាស់ភាគហ៊ុន។" },
+  { id: "minimum", en: "Minimum Tax", kh: "ពន្ធអប្បបរមា", cat: "income", icon: "", rate: "1%", due: "Annual filing", formulaEn: "Revenue (excl. VAT) × 1%", formulaKh: "ចំណូលមិនរួម VAT × ១%", defEn: "Ensures enterprises pay at least 1% of annual turnover.", defKh: "ពន្ធអប្បបរមា គឺជាពន្ធដែលគណនាលើផលរបរប្រចាំឆ្នាំមិនរួម VAT។ វាត្រូវបានប្រើសម្រាប់ប្រៀបធៀបជាមួយពន្ធលើប្រាក់ចំណូល។ អត្រាគឺ ១% នៃផលរបរប្រចាំឆ្នាំមិនរួម VAT។" },
+  { id: "rent", en: "Rent & Land Tax", kh: "ពន្ធជួលដីនិងអចលន", cat: "transaction", icon: "", rate: "10%", due: "Monthly", formulaEn: "Rental Income × 10%", formulaKh: "ប្រាក់ជួល × ១០%", defEn: "10% on rental income.", defKh: "ពន្ធឈ្នួលផ្ទះ និងដី គឺជាពន្ធដែលគិតលើប្រាក់ចំណូលពីការជួលផ្ទះ ដី អគារ ឬអចលនទ្រព្យផ្សេងៗ។ ជាទូទៅ វាត្រូវបានគិតក្នុងអត្រា ១០% លើប្រាក់ជួល។" },
+  { id: "landtransfer", en: "Land Transfer Tax", kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី គឺជាប្រភេទមួយនៃពន្ធប្រថាប់ត្រា ដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
+  { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%", due: "Annual", formulaEn: "Property Value × 0.1%", formulaKh: "តម្លៃ × ០.១%", defEn: "Annual tax on immovable property.", defKh: "ពន្ធលើអចលនទ្រព្យ គឺជាពន្ធដែលគិតលើការកាន់កាប់អចលនទ្រព្យ ដូចជា ដី ផ្ទះ អគារ ឬសំណង់។ ពន្ធនេះជាធម្មតាបង់ដោយម្ចាស់អចលនទ្រព្យ។" },
+  { id: "stamp", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "0.1%–1%", due: "At execution", formulaEn: "Document Value × Rate", formulaKh: "តម្លៃ × អត្រា", defEn: "Tax on official documents.", defKh: "ពន្ធប្រថាប់ត្រា គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិ ឬចុះបញ្ជីឯកសារផ្លូវការ។ វាអាចពាក់ព័ន្ធនឹងការផ្ទេរដី ផ្ទះ អគារ យានជំនិះ ឬភាគហ៊ុន។" },
+  { id: "corporate", en: "Corporate Income Tax", kh: "ពន្ធនីតិបុគ្គល", cat: "income", icon: "", rate: "20%", due: "Annual filing", formulaEn: "Taxable Income × 20%", formulaKh: "ចំណូលជាប់ពន្ធ × ២០%", defEn: "Tax on net profit of companies.", defKh: "ពន្ធលើប្រាក់ចំណូលនីតិបុគ្គល គឺជាពន្ធដែលគណនាលើប្រាក់ចំណេញជាប់ពន្ធរបស់ក្រុមហ៊ុន ឬនីតិបុគ្គល។ ប្រាក់ចំណេញជាប់ពន្ធអាចខុសពីប្រាក់ចំណេញក្នុងគណនេយ្យ ព្រោះត្រូវមានការកែតម្រូវតាមច្បាប់ពន្ធ។" },
+  { id: "naturalresource", en: "Natural Resource Tax", kh: "ពន្ធធនធានធម្មជាតិ", cat: "income", icon: "", rate: "30%", due: "Annual filing", formulaEn: "Revenue × 30%", formulaKh: "ចំណូល × ៣០%", defEn: "Tax on oil, gas, and mining revenue.", defKh: "ពន្ធលើប្រាក់ចំណូលធនធានធម្មជាតិ គឺជាពន្ធលើប្រាក់ចំណូលពីអាជីវកម្មធនធានធម្មជាតិ ដូចជា ប្រេងកាត ឧស្ម័នធម្មជាតិ រ៉ែមាស ត្បូងមានតម្លៃ ឬធនធានធម្មជាតិផ្សេងៗ។ អត្រាពន្ធគឺ ៣០%។" },
+  { id: "qip", en: "QIP Tax", kh: "ពន្ធ QIP", cat: "income", icon: "", rate: "0%–20%", due: "Per QIP schedule", formulaEn: "Profit × QIP Rate", formulaKh: "ប្រាក់ចំណេញ × អត្រា QIP", defEn: "Tax for Qualified Investment Projects.", defKh: "QIP មានន័យថា គម្រោងវិនិយោគមានលក្ខណៈសម្បត្តិគ្រប់គ្រាន់។ សម្រាប់គម្រោង QIP ដែលស្ថិតក្នុងរយៈពេលលើកលែងពន្ធ អត្រាពន្ធលើប្រាក់ចំណូលអាចជា ០%។" },
+  { id: "insurance", en: "Insurance Tax", kh: "ពន្ធធានារ៉ាប់រង", cat: "income", icon: "", rate: "5%–20%", due: "Monthly/Quarterly", formulaEn: "Premium × 5% or 20%", formulaKh: "បុព្វលាភ × ៥% ឬ ២០%", defEn: "Special tax for insurance enterprises.", defKh: "ពន្ធលើសហគ្រាសធានារ៉ាប់រង គឺជាពន្ធសម្រាប់ក្រុមហ៊ុនធានារ៉ាប់រង។ សម្រាប់ធានារ៉ាប់រងលើទ្រព្យសម្បត្តិ ឬហានិភ័យ អត្រា ៥% លើបុព្វលាភធានារ៉ាប់រងដុល។ សម្រាប់ធានារ៉ាប់រងជីវិត ឬសកម្មភាពផ្សេងៗ ប្រើអត្រា ២០%។" },
+  { id: "progressive", en: "Progressive Tax", kh: "ពន្ធសហគ្រាសឯកបុគ្គល", cat: "income", icon: "", rate: "0%–20%", due: "Annual filing", formulaEn: "Progressive rates with offsets", formulaKh: "អត្រាកំណើន", defEn: "Progressive tax for sole proprietors.", defKh: "ពន្ធនេះគិតលើប្រាក់ចំណូលប្រចាំឆ្នាំរបស់រូបវន្តបុគ្គល សហគ្រាសឯកបុគ្គល ឬចំណែកដែលបែងចែកឲ្យសមាជិកក្នុងក្រុមហ៊ុនសហកម្មសិទ្ធិ។ វាប្រើអត្រាកំណើនតាមថ្នាក់។" },
+  { id: "taxadjustment", en: "Taxable Income Adjustment", kh: "ការគណនាចំណូលជាប់ពន្ធ", cat: "income", icon: "", rate: "—", due: "Before filing", formulaEn: "Accounting Profit +/− Adjustments", formulaKh: "ប្រាក់ចំណេញ ± កែតម្រូវ", defEn: "Reconcile accounting to taxable income.", defKh: "ការគណនាប្រាក់ចំណូលជាប់ពន្ធ គឺជាដំណើរការកែតម្រូវប្រាក់ចំណេញតាមគណនេយ្យ ដើម្បីរកប្រាក់ចំណូលដែលត្រូវយកទៅគណនាពន្ធ។ ចំណាយខ្លះមិនអាចកាត់កងបាន ហើយចំណូលខ្លះមិនជាប់ពន្ធ ដូច្នេះត្រូវកែតម្រូវមុនគណនាពន្ធ។" },
+  { id: "annual", en: "Annual Tax & Prepayment", kh: "ពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ", cat: "income", icon: "", rate: "1%–20%", due: "Annual filing", formulaEn: "Net Profit × 20% or Base × 1%", formulaKh: "ចំណេញ × ២០% ឬ Base × ១%", defEn: "Annual profit tax with minimum tax floor and monthly prepayment credit.", defKh: "ពន្ធប្រចាំឆ្នាំ រួមបញ្ចូលការគណនាពន្ធលើប្រាក់ចំណេញសុទ្ធ និងពន្ធអប្បបរមា។ ប្រសិនបើក្រុមហ៊ុនមានប្រាក់ចំណេញ ត្រូវបង់ពន្ធ ២០% នៃប្រាក់ចំណេញ។ ប្រសិនបើក្រុមហ៊ុនខាតបង់ ត្រូវបង់តែពន្ធអប្បបរមា ១% នៃផលរបរ។" },
 ];
 
 export const CATEGORIES = [
   { id: "all", en: "All Taxes", kh: "ពន្ធទាំងអស់", icon: "" },
   { id: "income", en: "Income Tax", kh: "ពន្ធលើចំណូល", icon: "" },
-  { id: "indirect", en: "Indirect Tax", kh: "ពន្ធប្រយោដន", icon: "" },
+  { id: "indirect", en: "Indirect Tax", kh: "ពន្ធប្រយោល", icon: "" },
   { id: "transaction", en: "Transaction Tax", kh: "ពន្ធលើប្រតិបត្តិការ", icon: "" },
   { id: "advance", en: "Advance & Withholding", kh: "ពន្ធបង់ជាមុន និងកាត់ទុក", icon: "" },
 ];

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { T, TAXES, CATEGORIES, gold, gold2, navy, card, muted, white, border, red, green } from "./data.js";
-import { Row, Table, OverviewTab, SalaryTab, PrepaymentTab, VATTab, SpecialTab, WHTTab, PublicLightingTab, AccommodationTab, DividendTab, MinimumTaxTab, RentLandTab, LandTransferTab, PropertyTaxTab, StampTaxTab } from "./tabs.jsx";
+import { Row, Table, OverviewTab, SalaryTab, PrepaymentTab, VATTab, SpecialTab, WHTTab, PublicLightingTab, AccommodationTab, DividendTab, MinimumTaxTab, RentLandTab, LandTransferTab, PropertyTaxTab, StampTaxTab, CorporateIncomeTaxTab, NaturalResourceTaxTab, QIPTaxTab, InsuranceTaxTab, ProgressiveIndividualTaxTab, TaxableIncomeAdjustmentTab, AnnualTaxTab } from "./tabs.jsx";
 
 const BASE = import.meta.env.BASE_URL || "/";
 
@@ -84,7 +84,7 @@ function HomePage({ lang, navigate }) {
   const [counted, setCounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setCounted(true), 200); return () => clearTimeout(t); }, []);
   const stats = [
-    { label: t.stat1Label, val: "13", suffix: "" },
+    { label: t.stat1Label, val: "19", suffix: "" },
     { label: t.stat2Label, val: "2", suffix: "" },
     { label: t.stat3Label, val: "4", suffix: "" },
     { label: t.stat4Label, val: "100", suffix: "%" },
@@ -290,6 +290,10 @@ const TAX_COMPONENTS = {
   withholding: WHTTab, lighting: PublicLightingTab, accommodation: AccommodationTab,
   dividend: DividendTab, minimum: MinimumTaxTab, rent: RentLandTab,
   landtransfer: LandTransferTab, property: PropertyTaxTab, stamp: StampTaxTab,
+  corporate: CorporateIncomeTaxTab, naturalresource: NaturalResourceTaxTab,
+  qip: QIPTaxTab, insurance: InsuranceTaxTab,
+  progressive: ProgressiveIndividualTaxTab, taxadjustment: TaxableIncomeAdjustmentTab,
+  annual: AnnualTaxTab,
 };
 
 function CalculatorPage({ lang, navigate, calcId }) {
@@ -450,14 +454,14 @@ export default function CambodiaTaxCalculator() {
           <img src={BASE + "logo_GDOT.png"} alt="GDT" style={logoImg} onError={e => e.target.style.display="none"} className="logo-lg" />
           <img src={BASE + "logo_GDOT.png"} alt="GDT" style={logoImgMob} onError={e => e.target.style.display="none"} className="logo-sm" />
           <div style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { navigate("#/"); setMenuOpen(false); }}>
-            <div style={{ color: muted, fontSize: "0.85rem", fontWeight: 600, lineHeight: 1.2 }}>ម៉ាសុីនគិតពន្ធនៃព្រះរាជាណាចក្រកម្ពុជា</div>
+            <div style={{ color: muted, fontSize: "0.85rem", fontWeight: 600, lineHeight: 1.2 }}>ព្រះរាជាណាចក្រកម្ពុជា ជាតិសាសនាព្រះមហាក្សត្រ</div>
             <div style={{ color: gold, fontWeight: 700, fontSize: "0.95rem" }}>{T[lang].appTitle}</div>
             <div style={{ color: muted, fontSize: "0.7rem" }}>{T[lang].appSub}</div>
           </div>
           <img src={BASE + "logo_ITC.png"} alt="ITC" style={{ ...logoImg, background: "white" }} onError={e => e.target.style.display="none"} className="logo-lg" />
           <img src={BASE + "logo_ITC.png"} alt="ITC" style={{ ...logoImgMob, background: "white" }} onError={e => e.target.style.display="none"} className="logo-sm" />
           <div style={{ position: "absolute", right: 12, top: 6, display: "flex", gap: 4, alignItems: "center" }}>
-            <span className="desktop-only" style={{ background: "rgba(212,168,67,0.12)", border: `1px solid ${border}`, color: gold, padding: "2px 8px", borderRadius: 20, fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap" }}>{T[lang].taxes13}</span>
+            <span className="desktop-only" style={{ background: "rgba(212,168,67,0.12)", border: `1px solid ${border}`, color: gold, padding: "2px 8px", borderRadius: 20, fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap" }}>{T[lang].taxes19}</span>
             <button style={langBtn(lang === "en")} onClick={() => setLang("en")}>EN</button>
             <button style={langBtn(lang === "kh")} onClick={() => setLang("kh")}>KH</button>
           </div>

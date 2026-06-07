@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { T, fmt, gold, gold2, navy, card, red, green, muted, white, border } from "./data.js";
-import { calcSalaryTax, calcNonResidentTax, calcPrepaymentTax, calcImportVAT, calcSpecialFirstSeller, calcSpecialReseller, calcSpecialLocal, calcWHT, calcLighting, calcAccom, calcDividend, calcMinTax, calcRent, calcLandTransfer, calcPropertyTax, calcStampTax } from "./data.js";
+import { calcSalaryTax, calcNonResidentTax, calcPrepaymentTax, calculateAdvancedPrepaymentTax, calcImportVAT, calcSpecialLocalBase, calcSpecialProducer, calcSpecialImport, calcSpecialReseller, calcWHT, calcLighting, calcAccom, calcDividend, calcMinTax, calcRent, calcLandTransfer, calcPropertyTax, calcStampTax, calcCorporateIncomeTax, calcNaturalResourceTax, calcQIPTax, calcInsuranceTax, calcProgressiveIndividualTax, calcTaxableIncome } from "./data.js";
 
 // ═══════════════════════════════════════════════════════════
 // SHARED COMPONENTS
@@ -51,15 +51,15 @@ const grid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 };
 export function OverviewTab({ lang }) {
   const t = T[lang].overview;
   const taxes = [
-    { en: "Salary Tax",          kh: "ពន្ធលើប្រាក់បៀវត្ស",           def_en: "Monthly progressive tax withheld by employer. Residents: 0%-20% with 150,000 KHR deduction per dependant. Non-residents: flat 20%.", def_kh: "ពន្ធប្រចាំខែ ០%-២០% ។ ដក ១៥០,០០០ ៛ ក្នុង ១ ណ",      formula: lang==="en"?"Taxable = Gross − (Deps × 150,000) → Tax = Taxable × Rate − Offset":"ជាប់ពន្ធ = ប្រាក់ − (ណ × ១៥០,០០០) → ពន្ធ = ជាប់ × អត្រា" },
+    { en: "Salary Tax",          kh: "ពន្ធលើប្រាក់បៀវត្ស",           def_en: "Monthly progressive tax withheld by employer. Residents: 0%-20% with 150,000 KHR deduction per dependant. Non-residents: flat 20%.", def_kh: "ពន្ធប្រចាំខែ ០%-២០% ។ ដក ១៥០,០០០ ៛ ក្នុង ១ ចំនួនបន្ទុក",      formula: lang==="en"?"Taxable = Gross − (Deps × 150,000) → Tax = Taxable × Rate − Offset":"ជាប់ពន្ធ = ប្រាក់ − (ចំនួនបន្ទុក × ១៥០,០០០) → ពន្ធ = ជាប់ × អត្រា" },
     { en: "Prepayment Tax",      kh: "ប្រាក់រំដោះពន្ធ",              def_en: "Monthly 1% advance credited against annual profit tax.", def_kh: "ពន្ធ ១% ប្រចាំខែ ដើម្បីរំដោះពន្ធចំណេញ",               formula: lang==="en"?"Base = Revenue / 1.1 → Tax = Base × 1%":"Base = ចំណូល / ១.១ → ពន្ធ = Base × ១%" },
     { en: "VAT",                 kh: "អាករលើតម្លៃបន្ថែម",             def_en: "10% on taxable supplies. Net VAT = Output VAT − Input VAT.", def_kh: "១០% លើការផ្គត់ផ្គង់ជាប់អាករ",                          formula: lang==="en"?"Net VAT = Output VAT − Input VAT":"VAT = Output − Input" },
     { en: "Special Tax",         kh: "អាករពិសេស",                   def_en: "Excise tax on alcohol (35%), beer (30%), cigarettes (20%), soft drinks (10%), cement (5%), services (3-10%).", def_kh: "ស្រា ៣៥%, បៀរ ៣០%, បារី ២០%, ភេសជ្ជៈ ១០%", formula: lang==="en"?"Base × Rate (3 calculation methods)":"Base × អត្រា (៣ វិធីគណនា)" },
     { en: "Withholding Tax",     kh: "ពន្ធកាត់ទុក",                  def_en: "Deducted at source: Services/Royalties/Interest 15%, Rental 10%, Fixed deposit 6%, Non-fixed 4%, Non-resident 14%.", def_kh: "កាត់ទុក: សេវា/ការប្រាក់ ១៥%, ជួល ១០%, ប្រាក់ ៦%, ៤%, ១៤%", formula: lang==="en"?"WHT = Gross × Rate":"ពន្ធ = ប្រាក់ × អត្រា" },
-    { en: "Public Lighting Tax", kh: "ពន្ធភ្លើងសាធារណៈ",             def_en: "5% sub-national tax on goods. Base removes VAT and Special Tax.", def_kh: "ពន្ធ ៥% ថ្នាក់ក្រោមជាតិ",                              formula: lang==="en"?"(Sales / 1.10) / 1.05 × 5%":"(លក់ / ១.១) / ១.០៥ × ៥%" },
+    { en: "Public Lighting Tax", kh: "ពន្ធបំភ្លឺសាធារណៈ",             def_en: "5% sub-national tax on goods. Base removes VAT and Special Tax.", def_kh: "ពន្ធ ៥% ថ្នាក់ក្រោមជាតិ",                              formula: lang==="en"?"(Sales / 1.10) / 1.05 × 5%":"(លក់ / ១.១) / ១.០៥ × ៥%" },
     { en: "Accommodation Tax",   kh: "អាករស្នាក់នៅ",                 def_en: "2% on hotel and guesthouse room charges.", def_kh: "២% លើការស្នាក់នៅ",                                            formula: lang==="en"?"Invoice / 1.10 × 2%":"វិក្កយបត្រ / ១.១ × ២%" },
     { en: "Dividend Tax",        kh: "ពន្ធភាគលាភ",                  def_en: "15% on profit distributed as dividends.", def_kh: "១៥% លើភាគលាភ",                                              formula: lang==="en"?"Dividend × 15%":"ភាគលាភ × ១៥%" },
-    { en: "Minimum Tax",         kh: "ពន្ធអប្បបរមា",                 def_en: "Ensures all enterprises pay at least 0.1% of gross annual revenue.", def_kh: "ពន្ធអប្បបរមា ០.១% នៃចំណូលប្រចាំឆ្នាំ",              formula: lang==="en"?"Revenue × 0.1% (pay higher of this or Profit Tax)":"ចំណូល × ០.១%" },
+    { en: "Minimum Tax",         kh: "ពន្ធអប្បបរមា",                 def_en: "Ensures all enterprises pay at least 1% of gross annual revenue (excl. VAT).", def_kh: "ពន្ធអប្បបរមា ១% នៃចំណូល (មិនរួម VAT)",              formula: lang==="en"?"Revenue (excl. VAT) × 1% (pay higher of this or Profit Tax)":"ចំណូល (មិនរួម VAT) × ១%" },
     { en: "Rent & Land Tax",     kh: "ពន្ធជួលអចលនទ្រព្យ",            def_en: "10% on rental income from property and land.", def_kh: "១០% លើប្រាក់ចំណូលពីការជួលអចលនទ្រព្យ",                  formula: lang==="en"?"Rental Income × 10%":"ប្រាក់ជួល × ១០%" },
     { en: "Land Transfer Tax",   kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី",          def_en: "4% on sale price when transferring land or property ownership.", def_kh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ",                  formula: lang==="en"?"Sale Price × 4%":"តម្លៃ × ៤%" },
     { en: "Property Tax",        kh: "ពន្ធអចលនទ្រព្យ",               def_en: "Annual tax on property value at 0.1% to 1%.", def_kh: "ពន្ធប្រចាំឆ្នាំ ០.១% ដល់ ១% លើអចលនទ្រព្យ",          formula: lang==="en"?"Property Value × Rate (0.1%–1%)":"តម្លៃ × អត្រា (០.១%-១%)" },
@@ -201,13 +201,26 @@ export function SalaryTab({ lang }) {
 // ═══════════════════════════════════════════════════════════
 export function PrepaymentTab({ lang }) {
   const t = T[lang].prepayment;
-  const [rev, setRev] = useState("");
+  const [incomes, setIncomes] = useState(Array(12).fill(""));
+  const [expenses, setExpenses] = useState("");
   const [result, setResult] = useState(null);
-  useEffect(() => {
-    const r = parseFloat(rev) || 0;
-    if (r > 0) setResult(calcPrepaymentTax(r));
-    else setResult(null);
-  }, [rev]);
+  const handleIncome = (i, v) => { const c = [...incomes]; c[i] = v; setIncomes(c); };
+  const monthlyResults = useMemo(() => incomes.map(v => { const r = parseFloat(v) || 0; return r > 0 ? calcPrepaymentTax(r) : null; }), [incomes]);
+  const totals = useMemo(() => {
+    let rev = 0, base = 0, tax = 0;
+    monthlyResults.forEach((r, i) => { if (r) { rev += parseFloat(incomes[i]) || 0; base += r.base; tax += r.tax; } });
+    return { rev, base, tax };
+  }, [monthlyResults, incomes]);
+  const doCalc = () => {
+    const vals = incomes.map(v => parseFloat(v) || 0);
+    const exp = parseFloat(expenses) || 0;
+    const totRev = vals.reduce((s, v) => s + v, 0);
+    const netProfit = (totRev / 1.10) - exp;
+    setResult({
+      monthly: { rev: totals.rev, base: totals.base, prepay: totals.tax },
+      annual: { netProfit, incomeTax: netProfit > 0 ? netProfit * 0.20 : 0, minimumTax: totals.base * 0.01, prepayTotal: totals.tax },
+    });
+  };
   return (
     <div>
       <div style={title}>{t.title}</div>
@@ -216,26 +229,53 @@ export function PrepaymentTab({ lang }) {
         <strong style={{ color: gold2 }}>{t.formula}:</strong> {t.formulaVal}<br />
         <strong style={{ color: gold2 }}>{t.whoPays}:</strong> {t.whoPaysVal}<strong style={{ color: gold2 }}> {t.due}:</strong> {t.dueVal}
       </div>
-      <div style={grid}>
-        <div className="card-hover" style={calcCard}>
-          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{t.calcTitle}</div>
-          <label style={label}>{t.revenueLabel}</label>
-          <input className="input-focus" style={input} type="number" placeholder="e.g. 110000000" value={rev} onChange={e=>setRev(e.target.value)} />
-          <button style={btn} onClick={()=>setResult(calcPrepaymentTax(parseFloat(rev)||0))}>{t.calcBtn}</button>
-          {result && <div className="result-fade" style={resultBox}>
-            <Row label={t.revenueRow} value={fmt(parseFloat(rev))} />
-            <Row label={t.baseRow} value={fmt(result.base)} />
-            <Row label={t.taxRow} value={fmt(result.tax)} color="red" />
-            <Row label={t.creditRow} value={fmt(result.tax)} color="green" />
-          </div>}
+      <div className="card-hover" style={calcCard}>
+        <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{t.calcTitle}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 4 }}>
+          {t.monthLabels.map((ml, i) => (
+            <div key={i}>
+              <label style={{ ...label, marginTop: 4, fontSize: "0.6rem" }}>{ml}</label>
+              <input className="input-focus" style={input} type="number" placeholder="0" value={incomes[i]} onChange={e => handleIncome(i, e.target.value)} />
+            </div>
+          ))}
         </div>
-        <div className="card-hover" style={calcCard}>
-          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{T[lang].common.example}</div>
-          <div style={{ fontSize: "0.82rem", color: "#B8C8DC", lineHeight: 1.9 }}>
-            <p><strong style={{ color: gold2 }}>{lang==="en"?"Revenue":"ចំណូល"}:</strong> 110,000,000 ៛</p>
-            <p><strong style={{ color: gold2 }}>{lang==="en"?"Base":"Base"}:</strong> 110,000,000 / 1.1 = 100,000,000 ៛</p>
-            <p><strong style={{ color: gold2 }}>{lang==="en"?"Tax":"ពន្ធ"}:</strong> 100,000,000 × 1% = 1,000,000 ៛</p>
+        <label style={label}>{t.expensesLabel}</label>
+        <input className="input-focus" style={input} type="number" placeholder="0" value={expenses} onChange={e => setExpenses(e.target.value)} />
+        <button style={btn} onClick={doCalc}>{t.calcBtn}</button>
+        {result && totals.base > 0 && <div className="result-fade" style={{ marginTop: 16 }}>
+          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: gold2, marginBottom: 10 }}>{lang==="en"?"Monthly Prepayment Breakdown":"តារាងរំដោះពន្ធប្រចាំខែ"}</div>
+          <Table rows={[
+            [t.monthCol, t.revenueCol, t.baseCol, t.prepaymentCol],
+            ...t.monthLabels.map((ml, i) => {
+              const r = monthlyResults[i];
+              const val = parseFloat(incomes[i]) || 0;
+              return [ml, fmt(val), r ? fmt(r.base) : "—", r ? fmt(r.tax) : "—"];
+            }),
+            [t.totalRow, fmt(result.monthly.rev), fmt(result.monthly.base), fmt(result.monthly.prepay)],
+          ]} />
+          <div style={{ borderTop: `2px solid ${gold}`, margin: "12px 0" }} />
+          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: gold2, marginBottom: 10 }}>{t.annualTitle}</div>
+          <Row label={t.netProfit} value={fmt(result.annual.netProfit)} color={result.annual.netProfit < 0 ? "red" : "green"} />
+          <Row label={lang==="en"?"Status":"ស្ថានភាព"} value={result.annual.netProfit < 0 ? t.lossStatus : t.profitStatus} color={result.annual.netProfit < 0 ? "red" : "green"} />
+          {result.annual.netProfit > 0 && <Row label={t.incomeTax} value={fmt(result.annual.incomeTax)} />}
+          <Row label={t.minimumTax} value={fmt(result.annual.minimumTax)} color="gold" />
+          <Row label={lang==="en"?"Prepayment Credit":"ឥណទានរំដោះពន្ធ"} value={"−" + fmt(result.annual.prepayTotal)} color="green" />
+          <div style={{ borderTop: `1px dashed ${border}`, margin: "8px 0" }} />
+          <Row label={t.finalPayable} value={fmt(Math.max(result.annual.incomeTax, result.annual.minimumTax) - result.annual.prepayTotal)} color={Math.max(result.annual.incomeTax, result.annual.minimumTax) - result.annual.prepayTotal > 0 ? "red" : "green"} />
+          <div style={{ ...hint, marginTop: 10, padding: "10px 12px", background: result.annual.netProfit < 0 ? "rgba(230,57,70,0.1)" : "rgba(39,174,96,0.1)", borderRadius: 8, border: `1px solid ${result.annual.netProfit < 0 ? red : green}`, fontSize: "0.75rem", lineHeight: 1.6 }}>
+            <strong style={{ color: result.annual.netProfit < 0 ? red : green }}>{result.annual.netProfit < 0 ? t.minTaxApplied : t.profitTaxApplied}</strong>
+            <div style={{ marginTop: 4, color: muted }}>{t.creditNote}</div>
           </div>
+        </div>}
+      </div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Example":"ឧទាហរណ៍"}:</strong><br />
+        <div style={{ fontSize: "0.82rem", color: "#B8C8DC", lineHeight: 1.9, marginTop: 4 }}>
+          <p>{t.exampleNote}</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"Base":"Base"}:</strong> 110,000,000 / 1.10 = 100,000,000 ៛</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"Prepayment Tax":"រំដោះពន្ធ"}:</strong> 100,000,000 × 1% = 1,000,000 ៛</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"Annual Net Profit":"ប្រាក់ចំណេញសុទ្ធ"}:</strong> {lang==="en"?"Total Revenue / 1.10 − Expenses":"ចំណូលសរុប / ១.១០ − ចំណាយ"}</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"If Loss":"បើខាតបង់"}:</strong> {lang==="en"?"Minimum Tax (1% of base) applies":"អនុវត្តពន្ធអប្បបរមា ១%"}</p>
         </div>
       </div>
     </div>
@@ -345,7 +385,7 @@ export function SpecialTab({ lang }) {
       <div style={subt}>{lang==="en"?"Excise tax on specific goods and services.":"អាករលើទំនិញ និងសេវាពិសេស។"}</div>
       <div style={box}>
         <strong style={{ color: gold2 }}>{lang==="en"?"Goods":"ទំនិញ"}:</strong> {lang==="en"?"Alcohol 35% | Beer 30% | Cigarettes 20% | Drinks 10% | Cement 5%":"ស្រា ៣៥% | បៀរ ៣០% | បារី ២០% | ភេសជ្ជៈ ១០% | ស៊ីម៉ង់ ៥%"}<br />
-        <strong style={{ color: gold2 }}>{lang==="en"?"Services":"សេវា"}:</strong> {lang==="en"?"Air tickets 10% | Leisure 10% | Telecom 3%":"ហោះហើរ ១០% | កម្សាន្ត ១០% | ទូរ ៣%"}
+        <strong style={{ color: gold2 }}>{lang==="en"?"Services":"សេវា"}:</strong> {lang==="en"?"Air tickets 10% | Leisure 10% | Telecom 3%":"ហោះហើរ ១០% | កម្សាន្ត ១០% | ទូរគមនាគមន៍ ៣%"}
       </div>
       <div style={grid}>
         <div className="card-hover" style={calcCard}>
@@ -385,7 +425,7 @@ export function SpecialTab({ lang }) {
             [lang==="en"?"Alcohol / Liquor":"ស្រា","35%"],[lang==="en"?"Beer":"ស្រាបៀរ","30%"],
             [lang==="en"?"Cigarettes":"បារី","20%"],[lang==="en"?"Cigars":"ស៊ីហ្គារ","25%"],
             [lang==="en"?"Soft Drinks":"ភេសជ្ជៈ","10%"],[lang==="en"?"Cement":"ស៊ីម៉ង់ត៍","5%"],
-            [lang==="en"?"Air Tickets / Leisure":"ហោះ/កម្សាន្ត","10%"],[lang==="en"?"Telecommunications":"ទូរ","3%"],
+            [lang==="en"?"Air Tickets / Leisure":"ហោះ/កម្សាន្ត","10%"],[lang==="en"?"Telecommunications":"ទូរគមនាគមន៍","3%"],
           ]} />
         </div>
       </div>
@@ -397,12 +437,12 @@ export function SpecialTab({ lang }) {
 // 5. WITHHOLDING TAX
 // ═══════════════════════════════════════════════════════════
 const WHT_CATS = {
-  services:{label:"Services",label_kh:"សេវាកម្ម",rate:15},
-  royalties:{label:"Royalties",label_kh:"រ. ទ្រព្យ",rate:15},
-  interest:{label:"Interest on loans",label_kh:"ការប្រាក់",rate:15},
-  rental:{label:"Rental income",label_kh:"ជួល",rate:10},
-  fixed_dep:{label:"Fixed deposit interest",label_kh:"ប្រាក់ (ថេរ)",rate:6},
-  nonfixed_dep:{label:"Non-fixed deposit interest",label_kh:"ប្រាក់ (មិនថេរ)",rate:4},
+  services:{label:"Services",label_kh:"សេវាកម្ម",rate:15,descEn:"Payment for service providers (management, consulting, technical).",descKh:"ការទូទាត់សម្រាប់អ្នកផ្តល់សេវា ដូចជា សេវាគ្រប់គ្រង ពិគ្រោះយោបល់ បច្ចេកទេស។",example:"10,000,000 × 15% = 1,500,000"},
+  royalties:{label:"Royalties",label_kh:"សួយសារ",rate:15,descEn:"Copyright, trademark, patent, software license, brand name.",descKh:"កម្មសិទ្ធិបញ្ញា ម៉ាកយីហោ ប៉ាតង់ Software License សិទ្ធិប្រើប្រាស់បច្ចេកវិទ្យា។",example:"2,000,000 × 15% = 300,000"},
+  interest:{label:"Interest on loans",label_kh:"ការប្រាក់",rate:15,descEn:"Interest payment on loans (non-bank/financial institution).",descKh:"ការបង់ការប្រាក់ទៅអ្នកជាប់ពន្ធនិវាសនជន ដែលមិនមែនជាធនាគារ ឬស្ថាប័នហិរញ្ញវត្ថុក្នុងស្រុក។",example:"1,000,000 × 15% = 150,000"},
+  rental:{label:"Rental income",label_kh:"ជួល",rate:10,descEn:"Rental of movable or immovable property.",descKh:"ចំណូលពីការឲ្យជួលចលនទ្រព្យ ឬអចលនទ្រព្យ ដូចជា ផ្ទះ ដី អគារ ការិយាល័យ ឡាន ឧបករណ៍។",example:"2,000,000 × 10% = 200,000"},
+  fixed_dep:{label:"Fixed deposit interest",label_kh:"ការប្រាក់ គណនីបញ្ញើមានកំណត់",rate:6,descEn:"Interest from fixed deposit accounts at banks/financial institutions.",descKh:"ការប្រាក់ពីគណនីបញ្ញើមានកំណត់ រយៈពេល ៣ខែ ៦ខែ ឬ ១ឆ្នាំ។",example:"1,000,000 × 6% = 60,000"},
+  savings:{label:"Savings account interest",label_kh:"ការប្រាក់ គណនីសន្សំគ្មានកំណត់",rate:4,descEn:"Interest from regular savings accounts (no fixed term).",descKh:"ការប្រាក់ពីគណនីសន្សំធម្មតា ដែលមិនមានរយៈពេលកំណត់ អាចដកប្រាក់ពេលណាក៏បាន។",example:"1,000,000 × 4% = 40,000"},
 };
 export function WHTTab({ lang }) {
   const t = T[lang].withholding;
@@ -439,6 +479,7 @@ export function WHTTab({ lang }) {
             <select style={select} value={cat} onChange={e=>setCat(e.target.value)}>
               {Object.entries(WHT_CATS).map(([k,v])=><option key={k} value={k}>{lang==="en"?v.label:v.label_kh} -- {v.rate}%</option>)}
             </select>
+            <div style={hint}>{lang==="en"?WHT_CATS[cat]?.descEn:WHT_CATS[cat]?.descKh}</div>
           </>}
           <label style={label}>{t.grossLabel}</label>
           <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={gross} onChange={e=>setGross(e.target.value)} />
@@ -455,17 +496,35 @@ export function WHTTab({ lang }) {
         <div className="card-hover" style={calcCard}>
           <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{t.rateRef}</div>
           <div style={{ fontSize: "0.7rem", color: muted, fontWeight: 700, marginBottom: 6, textTransform: "uppercase" }}>{t.residents}</div>
-          <Table rows={[
-            [lang==="en"?"Payment Type":"ប្រភេទ", lang==="en"?"Rate":"អត្រា"],
-            [lang==="en"?"Services":"សេវា","15%"],
-            [lang==="en"?"Royalties":"រ. ទ្រព្យ","15%"],
-            [lang==="en"?"Interest on loans":"ការប្រាក់","15%"],
-            [lang==="en"?"Rental income":"ជួល","10%"],
-            [lang==="en"?"Fixed deposit":"ប្រាក់ (ថេរ)","6%"],
-            [lang==="en"?"Non-fixed deposit":"ប្រាក់ (មិនថេរ)","4%"],
-          ]} />
-          <div style={{ fontSize: "0.7rem", color: muted, fontWeight: 700, margin: "12px 0 6px", textTransform: "uppercase" }}>{t.nonResidents}</div>
-          <Table rows={[[lang==="en"?"All payments":"ទាំងអស់", "14%"]]} />
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Category":"ប្រភេទ"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Example":"ឧទាហរណ៏"}</th></tr>
+            </thead>
+            <tbody>
+              {Object.entries(WHT_CATS).map(([k,v])=>{
+                const active=res==="resident"&&cat===k;
+                const bg=active?"rgba(212,168,67,0.10)":"transparent";
+                const bdr=active?`1px solid ${gold}`:"1px solid transparent";
+                return <tr key={k} style={{background:bg,border:bdr,borderRadius:4,cursor:"pointer"}} onClick={()=>{setRes("resident");setCat(k);}}>
+                  <td style={{padding:"5px 6px",borderBottom:"1px solid rgba(255,255,255,0.04)",color:"#C5D5E8"}}>
+                    <div style={{fontWeight:600}}>{lang==="en"?v.label:v.label_kh}</div>
+                    <div style={{fontSize:"0.62rem",color:muted}}>{lang==="en"?v.descEn:v.descKh}</div>
+                  </td>
+                  <td style={{padding:"5px 6px",textAlign:"center",borderBottom:"1px solid rgba(255,255,255,0.04)",color:gold,fontWeight:700,fontSize:"0.85rem"}}>{v.rate}%</td>
+                  <td style={{padding:"5px 6px",borderBottom:"1px solid rgba(255,255,255,0.04)",color:"#B8C8DC",fontFamily:"monospace",fontSize:"0.62rem"}}>{v.example}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+          <div style={{ fontSize: "0.7rem", color: muted, fontWeight: 700, margin: "10px 0 6px", textTransform: "uppercase" }}>{t.nonResidents}</div>
+          <div style={{display:"flex",alignItems:"center",gap:12,padding:"6px 8px",background:res==="nonresident"?"rgba(212,168,67,0.10)":"transparent",border:res==="nonresident"?`1px solid ${gold}`:"1px solid transparent",borderRadius:6,cursor:"pointer"}} onClick={()=>setRes("nonresident")}>
+            <div style={{flex:1}}>
+              <div style={{fontSize:"0.75rem",fontWeight:600,color:"#C5D5E8"}}>{lang==="en"?"All payments":"ទាំងអស់"}</div>
+              <div style={{fontSize:"0.62rem",color:muted}}>{lang==="en"?"Flat rate for non-resident recipients":"អត្រាសម្រាប់អ្នកទទួលជាអនិវាសនជន"}</div>
+            </div>
+            <div style={{fontSize:"0.9rem",fontWeight:700,color:gold}}>14%</div>
+            <div style={{fontSize:"0.62rem",color:"#B8C8DC",fontFamily:"monospace"}}>10,000,000 × 14% = 1,400,000</div>
+          </div>
           <div style={hint}>{t.exemptions}</div>
           <div style={hint}>{t.dueNote}</div>
         </div>
@@ -511,26 +570,73 @@ function SimpleCalcTab({ lang, titleEn, titleKh, subEn, subKh, boxContent, label
 // 6. PUBLIC LIGHTING TAX
 // ═══════════════════════════════════════════════════════════
 export function PublicLightingTab({ lang }) {
-  return <SimpleCalcTab lang={lang}
-    titleEn="Public Lighting Tax" titleKh="ពន្ធភ្លើងសាធារណៈ"
-    subEn="5% sub-national tax. Base removes VAT then Special Tax." subKh="ពន្ធ ៥% ថ្នាក់ក្រោមជាតិ។"
-    boxContent={(l)=><><strong style={{color:gold2}}>{l==="en"?"Formula":"រូបមន្ត"}:</strong> (Sales / 1.10) / 1.05 × 5%<br /><strong style={{color:gold2}}>{l==="en"?"Rate":"អត្រា"}:</strong> 5%</>}
-    labelEn="Sales Price on Invoice (KHR)" labelKh="តម្លៃលក់ (រៀល)"
-    placeholder="e.g. 10000000"
-    calcFn={calcLighting}
-    renderRows={(r,v,l)=><>
-      <Row label={l==="en"?"Sales Price":"តម្លៃ"} value={fmt(v)} />
-      <Row label={l==="en"?"Step 1: / 1.10":"ជំហាន ១: / ១.១"} value={fmt(v/1.10)} />
-      <Row label={l==="en"?"Step 2: Tax Base / 1.05":"ជំហាន ២: / ១.០៥"} value={fmt(r.base)} />
-      <Row label={l==="en"?"Public Lighting Tax (5%)":"ពន្ធ (៥%)"} value={fmt(r.tax)} color="red" />
-    </>}
-    exampleContent={(l)=><div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
-      <p><strong style={{color:gold2}}>{l==="en"?"Sales":"ការលក់"}:</strong> 10,000,000 ៛</p>
-      <p><strong style={{color:gold2}}>/ 1.10:</strong> 9,090,909 ៛</p>
-      <p><strong style={{color:gold2}}>/ 1.05:</strong> 8,658,009 ៛ ({l==="en"?"base":"មូលដ្ឋាន"})</p>
-      <p><strong style={{color:gold2}}>× 5%:</strong> 432,900 ៛</p>
-    </div>}
-  />;
+  const [mode, setMode] = useState("retailer");
+  const [val, setVal] = useState("");
+  const [result, setResult] = useState(null);
+  const doCalc = useCallback(() => {
+    const p = parseFloat(val) || 0;
+    if (p > 0) setResult(calcLighting(p, mode));
+    else setResult(null);
+  }, [val, mode]);
+  useEffect(() => { doCalc(); }, [doCalc]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Public Lighting Tax":"ពន្ធបំភ្លឺសាធារណៈ"}</div>
+      <div style={subt}>{lang==="en"?"5% sub-national tax on goods.":"ពន្ធ ៥% ថ្នាក់ក្រោមជាតិលើទំនិញ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong><br />
+        {lang==="en" ? <>
+          <span style={{color:"#B8C8DC"}}>First Seller: Base = Invoice / 1.10 / 1.05 → Tax = Base × 5%</span><br />
+          <span style={{color:"#B8C8DC"}}>Reseller: Base = (Invoice / 1.10 / 1.05) × 20% → Tax = Base × 5%</span>
+        </> : <>
+          <span style={{color:"#B8C8DC"}}>អ្នកលក់ដំបូង: មូលដ្ឋាន = វិក្កយបត្រ / ១.១ / ១.០៥ → ពន្ធ = មូលដ្ឋាន × ៥%</span><br />
+          <span style={{color:"#B8C8DC"}}>អ្នកលក់លើកទីពីរ: មូលដ្ឋាន = (វិក្កយបត្រ / ១.១ / ១.០៥) × ២០% → ពន្ធ = មូលដ្ឋាន × ៥%</span>
+        </>}
+        <br /><strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> 5%
+      </div>
+      <div className="card-hover" style={calcCard}>
+        <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+        <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+          <button style={{ padding: "6px 14px", borderRadius: 6, border: mode==="retailer" ? `2px solid ${gold}` : `1px solid ${border}`, background: mode==="retailer" ? "rgba(212,168,67,0.15)" : "transparent", color: mode==="retailer" ? gold : muted, cursor: "pointer", fontSize: "0.78rem" }} onClick={() => setMode("retailer")}>{lang==="en"?"First Seller":"អ្នកលក់ដំបូង"}</button>
+          <button style={{ padding: "6px 14px", borderRadius: 6, border: mode==="producer" ? `2px solid ${gold}` : `1px solid ${border}`, background: mode==="producer" ? "rgba(212,168,67,0.15)" : "transparent", color: mode==="producer" ? gold : muted, cursor: "pointer", fontSize: "0.78rem" }} onClick={() => setMode("producer")}>{lang==="en"?"Reseller":"អ្នកលក់លើកទីពីរ"}</button>
+        </div>
+        <label style={label}>{lang==="en"?"Invoice Price (KHR)":"ថ្លៃវិក្កយបត្រ (រៀល)"}</label>
+        <input className="input-focus" style={input} type="number" placeholder="e.g. 11550000" value={val} onChange={e => setVal(e.target.value)} />
+        {result && <div className="result-fade" style={resultBox}>
+          {mode === "retailer" ? <>
+            <Row label={lang==="en"?"Invoice Price":"ថ្លៃវិក្កយបត្រ"} value={fmt(parseFloat(val))} />
+            <Row label={lang==="en"?"Step 1: Remove VAT (/1.10)":"ជំហាន ១: ដក VAT (/១.១០)"} value={fmt(parseFloat(val)/1.10)} />
+            <Row label={lang==="en"?"Step 2: Remove Lighting Tax (/1.05)":"ជំហាន ២: ដក (/១.០៥)"} value={fmt(result.base)} />
+            <Row label={lang==="en"?"Tax Base":"មូលដ្ឋានពន្ធ"} value={fmt(result.taxableBase)} />
+            <Row label={lang==="en"?"Public Lighting Tax (5%)":"ពន្ធ (៥%)"} value={fmt(result.tax)} color="red" />
+          </> : <>
+            <Row label={lang==="en"?"Invoice Price":"ថ្លៃវិក្កយបត្រ"} value={fmt(parseFloat(val))} />
+            <Row label={lang==="en"?"Step 1: Remove VAT (/1.10)":"ជំហាន ១: ដក VAT (/១.១០)"} value={fmt(parseFloat(val)/1.10)} />
+            <Row label={lang==="en"?"Step 2: Remove (/1.05)":"ជំហាន ២: ដក (/១.០៥)"} value={fmt(result.base)} />
+            <Row label={lang==="en"?"Step 3: 20% for Reseller":"ជំហាន ៣: ២០% សម្រាប់អ្នកលក់លើកទីពីរ"} value={fmt(result.taxableBase)} />
+            <Row label={lang==="en"?"Public Lighting Tax (5% × 20%)":"ពន្ធ (៥% × ២០%)"} value={fmt(result.tax)} color="red" />
+          </>}
+        </div>}
+      </div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Example":"ឧទាហរណ៍"}:</strong><br />
+        <div style={{ fontSize: "0.82rem", color: "#B8C8DC", lineHeight: 1.9, marginTop: 4 }}>
+          {mode === "retailer" ? <>
+            <p>{lang==="en"?"Invoice Price = 11,550,000 KHR":"ថ្លៃវិក្កយបត្រ = ១១,៥៥០,០០០ រៀល"}</p>
+            <p><strong style={{ color: gold2 }}>/ 1.10:</strong> 10,500,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>/ 1.05:</strong> 10,000,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>× 5%:</strong> <strong style={{ color: red }}>500,000 ៛</strong></p>
+          </> : <>
+            <p>{lang==="en"?"Invoice Price = 11,550,000 KHR":"ថ្លៃវិក្កយបត្រ = ១១,៥៥០,០០០ រៀល"}</p>
+            <p><strong style={{ color: gold2 }}>/ 1.10:</strong> 10,500,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>/ 1.05:</strong> 10,000,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>× 20%:</strong> 2,000,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>× 5%:</strong> <strong style={{ color: red }}>100,000 ៛</strong></p>
+          </>}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -560,26 +666,74 @@ export function AccommodationTab({ lang }) {
 // ═══════════════════════════════════════════════════════════
 // 8. DIVIDEND TAX
 // ═══════════════════════════════════════════════════════════
+const DIVIDEND_CASES = {
+  listed_share:{label:"Trading shares on Cambodia Securities Exchange (CSX)",label_kh:"ការលក់ភាគហ៊ុននៅផ្សារមូលបត្រកម្ពុជា",rate:0,note:"0% exemption for listed shares",note_kh:"លើកលែង ០% សម្រាប់ភាគហ៊ុននៅ CSX"},
+  resident_entity:{label:"Resident entity → Resident entity (CIT already paid)",label_kh:"ក្រុមហ៊ុននិវាសនជន → ក្រុមហ៊ុននិវាសនជន (បានបង់ CIT)",rate:0,note:"0% — CIT already paid",note_kh:"០% — បានបង់ CIT រួចហើយ"},
+  resident_individual:{label:"Resident shareholder (company paid CIT)",label_kh:"ម្ចាស់ភាគហ៊ុននិវាសនជន (ក្រុមហ៊ុនបានបង់ CIT)",rate:0,note:"0% — no need to pay dividend tax again",note_kh:"០% — មិនចាំបាច់បង់ពន្ធភាគលាភទៀតទេ"},
+  nonresident:{label:"Non-resident shareholder (no DTA)",label_kh:"ម្ចាស់ភាគហ៊ុនអនិវាសនជន (គ្មាន DTA)",rate:14,note:"14% withholding tax",note_kh:"កាត់ទុក ១៤%"},
+  nonresident_dta:{label:"Non-resident shareholder (with DTA)",label_kh:"ម្ចាស់ភាគហ៊ុនអនិវាសនជន (មាន DTA)",rate:10,note:"Reduced to 10% under DTA",note_kh:"បន្ថយមក ១០% ក្រោមសន្ធិសញ្ញា DTA"},
+};
 export function DividendTab({ lang }) {
-  return <SimpleCalcTab lang={lang}
-    titleEn="Dividend Tax" titleKh="ពន្ធភាគលាភ"
-    subEn="15% on profit distributed as dividends." subKh="១៥% លើភាគលាភ"
-    boxContent={(l)=><><strong style={{color:gold2}}>{l==="en"?"Formula":"រូបមន្ត"}:</strong> Dividend × 15%<br /><strong style={{color:gold2}}>{l==="en"?"Rate":"អត្រា"}:</strong> 15%</>}
-    labelEn="Dividend Amount (KHR)" labelKh="ចំនួនភាគលាភ (រៀល)"
-    placeholder="e.g. 1000000"
-    calcFn={calcDividend}
-    renderRows={(r,v,l)=><>
-      <Row label={l==="en"?"Dividend Amount":"ភាគលាភ"} value={fmt(v)} />
-      <Row label={l==="en"?"Tax Rate":"អត្រា"} value="15%" />
-      <Row label={l==="en"?"Dividend Tax":"ពន្ធ"} value={fmt(r.tax)} color="red" />
-      <Row label={l==="en"?"Net to Shareholder":"ប្រាក់ទទួល"} value={fmt(r.net)} color="green" />
-    </>}
-    exampleContent={(l)=><div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
-      <p><strong style={{color:gold2}}>{l==="en"?"Dividend":"ភាគលាភ"}:</strong> 1,000,000 ៛</p>
-      <p><strong style={{color:gold2}}>{l==="en"?"Tax":"ពន្ធ"}:</strong> 1,000,000 × 15% = 150,000 ៛</p>
-      <p><strong style={{color:gold2}}>{l==="en"?"Net":"ប្រាក់ទទួល"}:</strong> 850,000 ៛</p>
-    </div>}
-  />;
+  const tabName = T[lang].tabs.dividend;
+  const [amount, setAmount] = useState("");
+  const [caseType, setCaseType] = useState("resident_entity");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const a = parseFloat(amount) || 0;
+    if (a > 0) setResult(calcDividend(a, DIVIDEND_CASES[caseType].rate));
+    else setResult(null);
+  }, [amount, caseType]);
+  const currentCase = DIVIDEND_CASES[caseType];
+  return (
+    <div>
+      <div style={title}>{tabName}</div>
+      <div style={subt}>{lang==="en"?"Dividend tax rate depends on recipient and entity type.":"អត្រាពន្ធភាគលាភអាស្រ័យលើប្រភេទអ្នកទទួល និងក្រុមហ៊ុន។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Key Concept":"គោលការណ៍"}:</strong> {lang==="en"?"Dividend tax rate depends on recipient type and entity type.":"អត្រាពន្ធភាគលាភអាស្រ័យលើប្រភេទអ្នកទទួល និងប្រភេទក្រុមហ៊ុន។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Scenario":"សេណារីយ៉ូ"}</label>
+          <select style={select} value={caseType} onChange={e=>setCaseType(e.target.value)}>
+            {Object.entries(DIVIDEND_CASES).map(([k,v])=><option key={k} value={k}>{lang==="en"?v.label:v.label_kh}</option>)}
+          </select>
+          <div style={hint}>{lang==="en"?currentCase.note:currentCase.note_kh}</div>
+          <label style={label}>{lang==="en"?"Dividend Amount (KHR)":"ចំនួនភាគលាភ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={amount} onChange={e=>setAmount(e.target.value)} />
+          <div style={hint}>{lang==="en"?"Rate":"អត្រា"}: {currentCase.rate}%</div>
+          <button style={btn} onClick={()=>setResult(calcDividend(parseFloat(amount)||0,currentCase.rate))}>{lang==="en"?"Calculate Dividend Tax":"គណនាពន្ធភាគលាភ"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Dividend Amount":"ចំនួនភាគលាភ"} value={fmt(parseFloat(amount))} />
+            <Row label={lang==="en"?"Tax Rate":"អត្រាពន្ធ"} value={currentCase.rate+"%"} />
+            <Row label={lang==="en"?"Dividend Tax":"ពន្ធភាគលាភ"} value={fmt(result.tax)} color="red" />
+            {currentCase.rate > 0 && <Row label={lang==="en"?"Net to Recipient":"ប្រាក់ទទួលសុទ្ធ"} value={fmt(result.net)} color="green" />}
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Scenario":"សេណារីយ៉ូ"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th></tr>
+            </thead>
+            <tbody>
+              {Object.entries(DIVIDEND_CASES).map(([k,v])=>{
+                const active=caseType===k;
+                const bg=active?"rgba(212,168,67,0.10)":"transparent";
+                return <tr key={k} style={{background:bg,cursor:"pointer"}} onClick={()=>setCaseType(k)}>
+                  <td style={{padding:"5px 6px",borderBottom:"1px solid rgba(255,255,255,0.04)",color:"#C5D5E8"}}>
+                    <div style={{fontWeight:600}}>{lang==="en"?v.label:v.label_kh}</div>
+                    <div style={{fontSize:"0.62rem",color:muted}}>{lang==="en"?v.note:v.note_kh}</div>
+                  </td>
+                  <td style={{padding:"5px 6px",textAlign:"center",borderBottom:"1px solid rgba(255,255,255,0.04)",color:gold,fontWeight:700,fontSize:"0.85rem"}}>{v.rate}%</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -600,22 +754,22 @@ export function MinimumTaxTab({ lang }) {
   return (
     <div>
       <div style={title}>{lang==="en"?"Minimum Tax — ពន្ធអប្បបរមា":"ពន្ធអប្បបរមា"}</div>
-      <div style={subt}>{lang==="en"?"0.1% of gross revenue. Pay higher of Minimum Tax or Profit Tax.":"ពន្ធ ០.១% នៃចំណូល។ បង់ចំនួនខ្ពស់ជាងពន្ធចំណេញ។"}</div>
+      <div style={subt}>{lang==="en"?"1% of gross revenue (excl. VAT). Pay higher of Minimum Tax or Profit Tax.":"ពន្ធ ១% នៃចំណូល (មិនរួម VAT)។ បង់ចំនួនខ្ពស់ជាងពន្ធចំណេញ។"}</div>
       <div style={box}>
-        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Revenue × 0.1%":"ចំណូល × ០.១%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Revenue (excl. VAT) × 1%":"ចំណូល (មិនរួម VAT) × ១%"}<br />
         <strong style={{ color: gold2 }}>{lang==="en"?"Rule":"ច្បាប់"}:</strong> {lang==="en"?"Pay MAX(Minimum Tax, Profit Tax)":"បង់ MAX(ពន្ធអប្បបរមា, ពន្ធចំណេញ)"}
       </div>
       <div style={grid}>
         <div className="card-hover" style={calcCard}>
           <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
-          <label style={label}>{lang==="en"?"Annual Gross Revenue (KHR)":"ចំណូលប្រចាំឆ្នាំ (រៀល)"}</label>
+          <label style={label}>{lang==="en"?"Annual Gross Revenue (excl. VAT) (KHR)":"ចំណូលប្រចាំឆ្នាំ (មិនរួម VAT) (រៀល)"}</label>
           <input className="input-focus" style={input} type="number" placeholder="e.g. 5000000" value={rev} onChange={e=>setRev(e.target.value)} />
           <label style={label}>{lang==="en"?"Actual Profit Tax (optional)":"ពន្ធចំណេញជាក់ស្ដែង (ស្រេចចិត្ត)"}</label>
           <input className="input-focus" style={input} type="number" placeholder="0" value={pt} onChange={e=>setPt(e.target.value)} />
           <button style={btn} onClick={doCalc}>{lang==="en"?"Calculate Minimum Tax":"គណនាពន្ធអប្បបរមា"}</button>
           {result && <div className="result-fade" style={resultBox}>
             <Row label={lang==="en"?"Annual Revenue":"ចំណូល"} value={fmt(result.revenue)} />
-            <Row label={lang==="en"?"Minimum Tax (0.1%)":"ពន្ធអប្បបរមា"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Minimum Tax (1%)":"ពន្ធអប្បបរមា (១%)"} value={fmt(result.tax)} color="red" />
             {result.profitTax>0 && <>
               <Row label={lang==="en"?"Profit Tax":"ពន្ធចំណេញ"} value={fmt(result.profitTax)} />
               <Row label={lang==="en"?"Tax to Pay (higher)":"ពន្ធត្រូវបង់"} value={fmt(result.finalTax)} color="gold" />
@@ -627,7 +781,7 @@ export function MinimumTaxTab({ lang }) {
           <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Example":"ឧទាហរណ៍"}</div>
           <div style={{ fontSize: "0.82rem", color: "#B8C8DC", lineHeight: 1.9 }}>
             <p><strong style={{ color: gold2 }}>{lang==="en"?"Revenue":"ចំណូល"}:</strong> 5,000,000 ៛</p>
-            <p><strong style={{ color: gold2 }}>{lang==="en"?"Min Tax":"ពន្ធអប្ប"}:</strong> 5,000,000 × 0.1% = 5,000 ៛</p>
+            <p><strong style={{ color: gold2 }}>{lang==="en"?"Min Tax":"ពន្ធអប្ប"}:</strong> 5,000,000 × 1% = 50,000 ៛</p>
           </div>
         </div>
       </div>
@@ -664,24 +818,49 @@ export function RentLandTab({ lang }) {
 // 11. LAND TRANSFER TAX
 // ═══════════════════════════════════════════════════════════
 export function LandTransferTab({ lang }) {
-  return <SimpleCalcTab lang={lang}
-    titleEn="Land Transfer Tax" titleKh="ពន្ធផ្ទេរកម្មសិទ្ធិដី"
-    subEn="4% on sale price when transferring land ownership." subKh="៤% លើតម្លៃ"
-    boxContent={(l)=><><strong style={{color:gold2}}>{l==="en"?"Formula":"រូបមន្ត"}:</strong> {l==="en"?"Sale Price × 4%":"តម្លៃ × ៤%"}</>}
-    labelEn="Sale Price / Property Value (KHR)" labelKh="តម្លៃ (រៀល)"
-    placeholder="e.g. 10000000"
-    calcFn={calcLandTransfer}
-    renderRows={(r,v,l)=><>
-      <Row label={l==="en"?"Sale Price":"តម្លៃ"} value={fmt(v)} />
-      <Row label={l==="en"?"Tax Rate":"អត្រា"} value="4%" />
-      <Row label={l==="en"?"Land Transfer Tax":"ពន្ធ"} value={fmt(r.tax)} color="red" />
-      <Row label={l==="en"?"Total Cost":"ចំណាយសរុប"} value={fmt(v+r.tax)} color="gold" />
-    </>}
-    exampleContent={(l)=><div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
-      <p><strong style={{color:gold2}}>{l==="en"?"Sale price":"តម្លៃ"}:</strong> 10,000,000 ៛</p>
-      <p><strong style={{color:gold2}}>{l==="en"?"Tax":"ពន្ធ"}:</strong> 10,000,000 × 4% = 400,000 ៛</p>
-    </div>}
-  />;
+  const [val, setVal] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const v = parseFloat(val) || 0;
+    if (v > 0) setResult(calcLandTransfer(v));
+    else setResult(null);
+  }, [val]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Land Transfer Tax":"ពន្ធផ្ទេរកម្មសិទ្ធិដី"}</div>
+      <div style={subt}>{lang==="en"?"4% on sale price when transferring land/property ownership.":"៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិដីធ្លី ឬអចលនទ្រព្យ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Sale Price × 4%":"តម្លៃលក់ × ៤%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"What it applies to":"អនុវត្តលើ"}:</strong> {lang==="en"?"Transfer of land, houses, buildings, and immovable property.":"ការផ្ទេរដី ផ្ទះ អគារ និងអចលនទ្រព្យផ្សេងៗ។"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Exemption":"ការលើកលែង"}:</strong> {lang==="en"?"Transfers between direct family members (spouse, children, parents).":"ការផ្ទេររវាងសមាជិកគ្រួសារផ្ទាល់ (ប្តីប្រពន្ធ កូន ឪពុកម្តាយ)។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Sale Price / Property Value (KHR)":"តម្លៃលក់ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={val} onChange={e=>setVal(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcLandTransfer(parseFloat(val)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Sale Price":"តម្លៃលក់"} value={fmt(parseFloat(val))} />
+            <Row label={lang==="en"?"Land Transfer Tax (4%)":"ពន្ធផ្ទេរ (៤%)"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Total Cost":"ថ្លៃដើមសរុប"} value={fmt(parseFloat(val)+result.tax)} color="gold" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Tax Type":"ប្រភេទពន្ធ"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Description":"បរិយាយ"}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}><div style={{fontWeight:600}}>{lang==="en"?"Land Transfer Tax":"ពន្ធផ្ទេរកម្មសិទ្ធិដី"}</div></td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>4%</td><td style={{padding:"5px 6px",color:muted,fontSize:"0.62rem"}}>{lang==="en"?"Charged on sale/transfer of land ownership.":"ប្រមូលលើការលក់/ផ្ទេរកម្មសិទ្ធិដីធ្លី។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}><div style={{fontWeight:600}}>{lang==="en"?"Stamp Tax":"ពន្ធប្រថាប់ត្រា"}</div></td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>0.1%-1%</td><td style={{padding:"5px 6px",color:muted,fontSize:"0.62rem"}}>{lang==="en"?"Applies to property transfers, contracts, and official documents.":"អនុវត្តលើការផ្ទេរអចលនទ្រព្យ កិច្ចសន្យា និងឯកសារផ្លូវការ។"}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -699,11 +878,16 @@ export function PropertyTaxTab({ lang }) {
   return (
     <div>
       <div style={title}>{lang==="en"?"Property Tax — ពន្ធអចលនទ្រព្យ":"ពន្ធអចលនទ្រព្យ"}</div>
-      <div style={subt}>{lang==="en"?"Annual tax on property. Rate: 0.1% to 1%.":"ពន្ធប្រចាំឆ្នាំ ០.១% ដល់ ១%"}</div>
-      <div style={box}><strong style={{color:gold2}}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Property Value × Rate":"តម្លៃ × អត្រា"}</div>
+      <div style={subt}>{lang==="en"?"Annual tax on immovable property in Cambodia. Rate: 0.1%.":"ពន្ធប្រចាំឆ្នាំលើអចលនទ្រព្យក្នុងកម្ពុជា។ អត្រា: ០.១%។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Property Value × 0.1%":"តម្លៃ × ០.១%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Scope":"វិសាលភាព"}:</strong> {lang==="en"?"Applies to immovable property worth over 100 million KHR (approx. $25,000).":"អនុវត្តចំពោះអចលនទ្រព្យមានតម្លៃលើស ១០០ លានរៀល។"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Exemption":"ការលើកលែង"}:</strong> {lang==="en"?"Primary residence and agricultural land are exempt.":"លំនៅដ្ឋានសំខាន់ និងដីកសិកម្មត្រូវបានលើកលែង។"}
+      </div>
       <div style={grid}>
         <div className="card-hover" style={calcCard}>
-          <label style={label}>{lang==="en"?"Property Value (KHR)":"តម្លៃ (រៀល)"}</label>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Property Value (KHR)":"តម្លៃអចលនទ្រព្យ (រៀល)"}</label>
           <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={val} onChange={e=>setVal(e.target.value)} />
           <label style={label}>{lang==="en"?"Tax Rate":"អត្រាពន្ធ"}</label>
           <select style={select} value={rate} onChange={e=>setRate(e.target.value)}>
@@ -715,14 +899,21 @@ export function PropertyTaxTab({ lang }) {
           {result && <div className="result-fade" style={resultBox}>
             <Row label={lang==="en"?"Property Value":"តម្លៃ"} value={fmt(parseFloat(val))} />
             <Row label={lang==="en"?"Rate":"អត្រា"} value={rate+"%"} />
-            <Row label={lang==="en"?"Property Tax":"ពន្ធ"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Property Tax":"ពន្ធអចលនទ្រព្យ"} value={fmt(result.tax)} color="red" />
           </div>}
         </div>
         <div className="card-hover" style={calcCard}>
-          <div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
-            <p><strong style={{color:gold2}}>{lang==="en"?"Value":"តម្លៃ"}:</strong> 10,000,000 ៛ | {lang==="en"?"Rate":"អត្រា"}: 0.5%</p>
-            <p><strong style={{color:gold2}}>{lang==="en"?"Tax":"ពន្ធ"}:</strong> 10,000,000 × 0.5% = 50,000 ៛</p>
-          </div>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate Level":"កម្រិតអត្រា"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Note":"កំណត់"}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>0.1%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Minimum annual property tax rate.":"អត្រាអប្បបរមា។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>0.5%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Common effective rate.":"អត្រាធម្មតា។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>1.0%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Maximum rate.":"អត្រាអតិបរមា។"}</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -744,10 +935,15 @@ export function StampTaxTab({ lang }) {
   return (
     <div>
       <div style={title}>{lang==="en"?"Stamp Tax — ពន្ធប្រថាប់ត្រា":"ពន្ធប្រថាប់ត្រា"}</div>
-      <div style={subt}>{lang==="en"?"0.1% to 1% on official documents.":"០.១% ដល់ ១% លើឯកសារ"}</div>
-      <div style={box}><strong style={{color:gold2}}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Document Value × Rate":"ឯកសារ × អត្រា"}</div>
+      <div style={subt}>{lang==="en"?"0.1% to 1% on official documents, contracts, and property transfers.":"០.១% ដល់ ១% លើឯកសារផ្លូវការ កិច្ចសន្យា និងការផ្ទេរអចលនទ្រព្យ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Document Value × Rate":"តម្លៃឯកសារ × អត្រា"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Scope":"វិសាលភាព"}:</strong> {lang==="en"?"Applies to contracts, property transfers, loan agreements, and official documents.":"អនុវត្តលើកិច្ចសន្យា ការផ្ទេរអចលនទ្រព្យ កិច្ចព្រមព្រៀងឥណទាន និងឯកសារផ្លូវការ។"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Exemptions":"ការលើកលែង"}:</strong> {lang==="en"?"Certain government documents and low-value transactions.":"ឯកសាររដ្ឋាភិបាលមួយចំនួន និងប្រតិបត្តិការមានតម្លៃទាប។"}
+      </div>
       <div style={grid}>
         <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
           <label style={label}>{lang==="en"?"Document Value (KHR)":"តម្លៃឯកសារ (រៀល)"}</label>
           <input className="input-focus" style={input} type="number" placeholder="e.g. 5000000" value={val} onChange={e=>setVal(e.target.value)} />
           <label style={label}>{lang==="en"?"Tax Rate":"អត្រាពន្ធ"}</label>
@@ -758,17 +954,389 @@ export function StampTaxTab({ lang }) {
           </select>
           <button style={btn} onClick={()=>setResult(calcStampTax(parseFloat(val)||0,parseFloat(rate)))}>{lang==="en"?"Calculate":"គណនា"}</button>
           {result && <div className="result-fade" style={resultBox}>
-            <Row label={lang==="en"?"Document Value":"តម្លៃ"} value={fmt(parseFloat(val))} />
+            <Row label={lang==="en"?"Document Value":"តម្លៃឯកសារ"} value={fmt(parseFloat(val))} />
             <Row label={lang==="en"?"Rate":"អត្រា"} value={rate+"%"} />
-            <Row label={lang==="en"?"Stamp Tax":"ពន្ធ"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Stamp Tax":"ពន្ធប្រថាប់ត្រា"} value={fmt(result.tax)} color="red" />
           </div>}
         </div>
         <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate Level":"កម្រិតអត្រា"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Note":"កំណត់"}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>0.1%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Lowest rate for contracts under certain thresholds.":"អត្រាទាបបំផុត។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>0.5%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Standard rate for property transfers.":"អត្រាស្តង់ដារ។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:gold,fontWeight:700}}>1.0%</td><td style={{padding:"5px 6px",color:muted}}>{lang==="en"?"Highest rate for specific categories.":"អត្រាខ្ពស់បំផុត។"}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 14. CORPORATE INCOME TAX
+// ═══════════════════════════════════════════════════════════
+export function CorporateIncomeTaxTab({ lang }) {
+  const [profit, setProfit] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const p = parseFloat(profit) || 0;
+    if (p > 0) setResult(calcCorporateIncomeTax(p));
+    else setResult(null);
+  }, [profit]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Corporate Income Tax — ពន្ធនីតិបុគ្គល":"ពន្ធនីតិបុគ្គល"}</div>
+      <div style={subt}>{lang==="en"?"20% tax on net profit of companies and legal entities.":"ពន្ធ ២០% លើប្រាក់ចំណេញសុទ្ធរបស់ក្រុមហ៊ុន។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Taxable Profit × 20%":"ប្រាក់ចំណេញជាប់ពន្ធ × ២០%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"Standard 20% (QIP may qualify for reduced rates)":"ស្តង់ដារ ២០% (QIP អាចទទួលបានអត្រាកាត់បន្ថយ)"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Scope":"វិសាលភាព"}:</strong> {lang==="en"?"Applies to all resident companies and foreign companies with Cambodian-source income.":"អនុវត្តចំពោះក្រុមហ៊ុននិវាសនជន និងក្រុមហ៊ុនបរទេសដែលមានចំណូលពីកម្ពុជា។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Net Profit / Taxable Income (KHR)":"ប្រាក់ចំណេញសុទ្ធ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={profit} onChange={e=>setProfit(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcCorporateIncomeTax(parseFloat(profit)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Taxable Profit":"ប្រាក់ចំណេញជាប់ពន្ធ"} value={fmt(parseFloat(profit))} />
+            <Row label={lang==="en"?"CIT Rate":"អត្រា"} value={result.rate+"%"} />
+            <Row label={lang==="en"?"Corporate Income Tax":"ពន្ធលើប្រាក់ចំណេញ"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Net Profit After Tax":"ប្រាក់ចំណេញសុទ្ធក្រោយពន្ធ"} value={fmt(result.net)} color="green" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Entity Type":"ប្រភេទ"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>{lang==="en"?"Standard CIT":"អត្រាស្តង់ដារ"}</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>20%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>{lang==="en"?"QIP (Qualified Investment Project)":"គម្រោងវិនិយោគ"}</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>0%-20%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>{lang==="en"?"Insurance":"ធានារ៉ាប់រង"}</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>5%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 15. NATURAL RESOURCE TAX
+// ═══════════════════════════════════════════════════════════
+export function NaturalResourceTaxTab({ lang }) {
+  const [revenue, setRevenue] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const r = parseFloat(revenue) || 0;
+    if (r > 0) setResult(calcNaturalResourceTax(r));
+    else setResult(null);
+  }, [revenue]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Natural Resource Tax — ពន្ធធនធានធម្មជាតិ":"ពន្ធធនធានធម្មជាតិ"}</div>
+      <div style={subt}>{lang==="en"?"30% tax on oil, gas, and mining revenue.":"ពន្ធ ៣០% លើចំណូលពីប្រេង ឧស្ម័ន និងរ៉ែ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Revenue × 30%":"ចំណូល × ៣០%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"30% on natural resource income.":"៣០% លើចំណូលធនធានធម្មជាតិ។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Revenue (KHR)":"ចំណូល (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={revenue} onChange={e=>setRevenue(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcNaturalResourceTax(parseFloat(revenue)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Revenue":"ចំណូល"} value={fmt(parseFloat(revenue))} />
+            <Row label={lang==="en"?"Rate":"អត្រា"} value={result.rate+"%"} />
+            <Row label={lang==="en"?"Natural Resource Tax":"ពន្ធធនធានធម្មជាតិ"} value={fmt(result.tax)} color="red" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
           <div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
-            <p><strong style={{color:gold2}}>{lang==="en"?"Contract":"កិច្ចសន្យា"}:</strong> 5,000,000 ៛ | {lang==="en"?"Rate":"អត្រា"}: 0.5%</p>
-            <p><strong style={{color:gold2}}>{lang==="en"?"Tax":"ពន្ធ"}:</strong> 5,000,000 × 0.5% = 25,000 ៛</p>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Oil & Gas":"ប្រេង និងឧស្ម័ន"}:</strong> 30%</p>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Mining":"រ៉ែ"}:</strong> 30%</p>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Other resources":"ធនធានផ្សេងៗ"}:</strong> Varies</p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 16. QIP TAX
+// ═══════════════════════════════════════════════════════════
+export function QIPTaxTab({ lang }) {
+  const [profit, setProfit] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const p = parseFloat(profit) || 0;
+    if (p > 0) setResult(calcQIPTax(p));
+    else setResult(null);
+  }, [profit]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"QIP Tax — ពន្ធ QIP":"ពន្ធ QIP"}</div>
+      <div style={subt}>{lang==="en"?"Tax for Qualified Investment Projects. 0% during tax holiday.":"ពន្ធសម្រាប់គម្រោងវិនិយោគមានលក្ខណៈសម្បត្តិគ្រប់គ្រាន់។ ០% អំឡុងពេលលើកលែងពន្ធ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Profit × QIP Rate":"ប្រាក់ចំណេញ × អត្រា QIP"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"0% during holiday, then 20% after.":"០% អំឡុងពេលលើកលែង បន្ទាប់មក ២០%។"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Incentives":"ការលើកទឹកចិត្ត"}:</strong> {lang==="en"?"Tax holiday up to 9 years, then 50% reduction for 3+ years.":"លើកលែងពន្ធរហូត ៩ឆ្នាំ បន្ទាប់មកបញ្ចុះ ៥០% រយៈពេល ៣ឆ្នាំបន្ថែម។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Net Profit (KHR)":"ប្រាក់ចំណេញសុទ្ធ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={profit} onChange={e=>setProfit(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcQIPTax(parseFloat(profit)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Profit":"ប្រាក់ចំណេញ"} value={fmt(parseFloat(profit))} />
+            <Row label={lang==="en"?"QIP CIT Rate":"អត្រា"} value={result.rate+"%"} />
+            <Row label={lang==="en"?"QIP Tax":"ពន្ធ QIP"} value={fmt(result.tax)} color="red" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Standard":"ស្តង់ដារ"}:</strong> 20% (after incentives)</p>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Tax Holiday":"ការលើកលែង"}:</strong> 0% (up to 9 years)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 17. INSURANCE TAX
+// ═══════════════════════════════════════════════════════════
+export function InsuranceTaxTab({ lang }) {
+  const [profit, setProfit] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const p = parseFloat(profit) || 0;
+    if (p > 0) setResult(calcInsuranceTax(p));
+    else setResult(null);
+  }, [profit]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Insurance Tax — ពន្ធធានារ៉ាប់រង":"ពន្ធធានារ៉ាប់រង"}</div>
+      <div style={subt}>{lang==="en"?"Special tax for insurance enterprises. 5% on property/risk premiums.":"ពន្ធពិសេសសម្រាប់សហគ្រាសធានារ៉ាប់រង។ ៥% លើបុព្វលាភធានារ៉ាប់រងទ្រព្យ។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Gross Premium × 5%":"បុព្វលាភដុល × ៥%"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"5% on property/risk insurance; 20% on life insurance.":"៥% លើការធានារ៉ាប់រងទ្រព្យ; ២០% លើការធានារ៉ាប់រងជីវិត។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Gross Premium / Profit (KHR)":"បុព្វលាភដុល (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={profit} onChange={e=>setProfit(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcInsuranceTax(parseFloat(profit)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Gross Premium":"បុព្វលាភដុល"} value={fmt(parseFloat(profit))} />
+            <Row label={lang==="en"?"Insurance Tax":"ពន្ធធានារ៉ាប់រង"} value={fmt(result.tax)} color="red" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Property Insurance":"ធានារ៉ាប់រងទ្រព្យ"}:</strong> 5%</p>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Life Insurance":"ធានារ៉ាប់រងជីវិត"}:</strong> 20%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 18. PROGRESSIVE INDIVIDUAL TAX
+// ═══════════════════════════════════════════════════════════
+export function ProgressiveIndividualTaxTab({ lang }) {
+  const [income, setIncome] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const i = parseFloat(income) || 0;
+    if (i > 0) setResult(calcProgressiveIndividualTax(i));
+    else setResult(null);
+  }, [income]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Progressive Individual Tax — ពន្ធសហគ្រាសឯកបុគ្គល":"ពន្ធសហគ្រាសឯកបុគ្គល"}</div>
+      <div style={subt}>{lang==="en"?"Progressive tax on annual income for sole proprietors and individuals.":"ពន្ធកំណើនលើចំណូលប្រចាំឆ្នាំសម្រាប់សហគ្រាសឯកបុគ្គល។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Annual Income × Progressive Rate":"ចំណូលប្រចាំឆ្នាំ × អត្រាកំណើន"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"0% to 20% depending on income level.":"០% ដល់ ២០% អាស្រ័យលើកម្រិតចំណូល។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Annual Individual Income (KHR)":"ចំណូលប្រចាំឆ្នាំ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 60000000" value={income} onChange={e=>setIncome(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcProgressiveIndividualTax(parseFloat(income)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Annual Income":"ចំណូលប្រចាំឆ្នាំ"} value={fmt(parseFloat(income))} />
+            <Row label={lang==="en"?"Tax Rate":"អត្រា"} value={result.rate+"%"} />
+            <Row label={lang==="en"?"Tax":"ពន្ធ"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Net After Tax":"នៅសល់ក្រោយពន្ធ"} value={fmt(result.net)} color="green" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
+            <thead>
+              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Income Range":"ជួរចំណូល"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>0 - 1,500,000</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>0%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>1,500,001 - 2,000,000</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>5%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>2,000,001 - 8,500,000</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>10%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>8,500,001 - 12,500,000</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>15%</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>Above 12,500,000</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>20%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 19. TAXABLE INCOME ADJUSTMENT
+// ═══════════════════════════════════════════════════════════
+export function TaxableIncomeAdjustmentTab({ lang }) {
+  const [accountingProfit, setAccountingProfit] = useState("");
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    const p = parseFloat(accountingProfit) || 0;
+    if (p > 0) setResult(calcTaxableIncome(p));
+    else setResult(null);
+  }, [accountingProfit]);
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"Taxable Income Adjustment — ការគណនាចំណូលជាប់ពន្ធ":"ការគណនាប្រាក់ចំណូលជាប់ពន្ធ"}</div>
+      <div style={subt}>{lang==="en"?"Reconcile accounting profit to taxable income by adjusting non-deductible expenses and exempt income.":"កែតម្រូវប្រាក់ចំណេញគណនេយ្យទៅជាចំណូលជាប់ពន្ធ ដោយកែតម្រូវចំណាយមិនអាចកាត់បាន និងចំណូលលើកលែង។"}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Accounting Profit + Disallowed Expenses - Exempt Income":"ប្រាក់ចំណេញគណនេយ្យ + ចំណាយមិនទទួលស្គាល់ - ចំណូលលើកលែង"}<br />
+        <strong style={{ color: gold2 }}>{lang==="en"?"Key Adjustments":"ការកែតម្រូវសំខាន់ៗ"}:</strong> {lang==="en"?"Disallowed: fines, gifts, donations without proof. Exempt: capital gains from share sales.":"មិនទទួលស្គាល់: ពិន័យ កាដូ បរិច្ចាគគ្មានភស្តុតាង។ លើកលែង: ប្រាក់ចំណេញពីការលក់ភាគហ៊ុន។"}
+      </div>
+      <div style={grid}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
+          <label style={label}>{lang==="en"?"Accounting Profit (KHR)":"ប្រាក់ចំណេញគណនេយ្យ (រៀល)"}</label>
+          <input className="input-focus" style={input} type="number" placeholder="e.g. 10000000" value={accountingProfit} onChange={e=>setAccountingProfit(e.target.value)} />
+          <button style={btn} onClick={()=>setResult(calcTaxableIncome(parseFloat(accountingProfit)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
+          {result && <div className="result-fade" style={resultBox}>
+            <Row label={lang==="en"?"Accounting Profit":"ប្រាក់ចំណេញគណនេយ្យ"} value={fmt(parseFloat(accountingProfit))} />
+            <Row label={lang==="en"?"Add: Disallowed Expenses":"បូក៖ ចំណាយមិនទទួលស្គាល់"} value={fmt(result.disallowed)} color="red" />
+            <Row label={lang==="en"?"Less: Exempt Income":"ដក៖ ចំណូលលើកលែង"} value={"-"+fmt(result.exempt)} color="green" />
+            <Row label={lang==="en"?"Taxable Income":"ប្រាក់ចំណូលជាប់ពន្ធ"} value={fmt(result.taxable)} color="gold" />
+          </div>}
+        </div>
+        <div className="card-hover" style={calcCard}>
+          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Reference":"ឯកសារយោង"}</div>
+          <div style={{fontSize:"0.82rem",color:"#B8C8DC",lineHeight:1.9}}>
+            <p><strong style={{color:gold2}}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong></p>
+            <p>{lang==="en"?"Accounting Profit":"ប្រាក់ចំណេញគណនេយ្យ"}</p>
+            <p>+ {lang==="en"?"Disallowed Expenses (fines, gifts, donations without proof, etc.)":"ចំណាយមិនទទួលស្គាល់ (ពិន័យ, កាដូ, បរិច្ចាគគ្មានភស្តុតាង។ល។)"}</p>
+            <p>- {lang==="en"?"Exempt Income (capital gains from share sales, etc.)":"ចំណូលលើកលែង (ប្រាក់ចំណេញពីការលក់ភាគហ៊ុន។ល។)"}</p>
+            <p><strong style={{color:gold2}}>= {lang==="en"?"Taxable Income":"ប្រាក់ចំណូលជាប់ពន្ធ"}</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// 20. Annual Tax & Prepayment
+// ═══════════════════════════════════════════════════════════
+export function AnnualTaxTab({ lang }) {
+  const t = T[lang].annual;
+  const [incomes, setIncomes] = useState(Array(12).fill(""));
+  const [expenses, setExpenses] = useState("");
+  const [result, setResult] = useState(null);
+  const [includeVAT, setIncludeVAT] = useState(true);
+
+  const handleIncome = (i, v) => {
+    const copy = [...incomes];
+    copy[i] = v;
+    setIncomes(copy);
+  };
+
+  const doCalc = () => {
+    const vals = incomes.map(v => parseFloat(v) || 0);
+    const exp = parseFloat(expenses) || 0;
+    const r = calculateAdvancedPrepaymentTax({
+      monthlyIncomes: vals,
+      annualNetProfit: vals.reduce((s, v) => s + v, 0) - exp,
+      includesVAT: includeVAT,
+    });
+    setResult(r);
+  };
+
+  return (
+    <div>
+      <div style={title}>{t.title}</div>
+      <div style={subt}>{t.sub}</div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{t.formula}:</strong> {t.formulaVal}<br />
+        <strong style={{ color: gold2 }}>{t.whoPays}:</strong> {t.whoPaysVal}<strong style={{ color: gold2 }}> {t.due}:</strong> {t.dueVal}
+      </div>
+      <div style={{ ...calcCard, maxWidth: 720 }}>
+        <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{t.calcTitle}</div>
+
+        <label style={label}>{t.includesVAT}</label>
+        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+          <button style={{ padding: "6px 14px", borderRadius: 6, border: includeVAT ? `2px solid ${gold}` : `1px solid ${border}`, background: includeVAT ? "rgba(212,168,67,0.15)" : "transparent", color: includeVAT ? gold : muted, cursor: "pointer", fontSize: "0.78rem" }} onClick={() => setIncludeVAT(true)}>{t.yesVAT}</button>
+          <button style={{ padding: "6px 14px", borderRadius: 6, border: !includeVAT ? `2px solid ${gold}` : `1px solid ${border}`, background: !includeVAT ? "rgba(212,168,67,0.15)" : "transparent", color: !includeVAT ? gold : muted, cursor: "pointer", fontSize: "0.78rem" }} onClick={() => setIncludeVAT(false)}>No (revenue ex-VAT)</button>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 14 }}>
+          {incomes.map((v, i) => (
+            <div key={i}>
+              <label style={{ ...label, marginTop: 4, fontSize: "0.65rem" }}>{t.monthLabels[i]}</label>
+              <input className="input-focus" style={input} type="number" placeholder="0" value={v} onChange={e => handleIncome(i, e.target.value)} />
+            </div>
+          ))}
+        </div>
+
+        <label style={label}>{t.expenses}</label>
+        <input className="input-focus" style={input} type="number" placeholder="0" value={expenses} onChange={e => setExpenses(e.target.value)} />
+
+        <button style={btn} onClick={doCalc}>{t.calcBtn}</button>
+
+        {result && !result.error && <div className="result-fade" style={resultBox}>
+          <div style={{ fontSize: "0.8rem", fontWeight: 700, color: gold2, marginBottom: 8 }}>{t.summaryTitle}</div>
+          {result.monthlyResults.map((m, i) => (
+            <Row key={i} label={`${t.monthLabels[i]}: ${t.revenueCol}`} value={fmt(m.revenue)} />
+          ))}
+          <Row label={t.totalRevenue} value={fmt(result.summary.totalRevenue)} color="gold" />
+          <Row label={t.totalBase} value={fmt(result.summary.totalBase)} />
+          <div style={divider} />
+          <Row label={t.netProfit} value={fmt(result.summary.annualNetProfit)} color={result.summary.annualNetProfit < 0 ? "red" : "green"} />
+          <Row label={t.incomeTax} value={fmt(result.summary.incomeTax)} />
+          <Row label={t.minimumTax} value={fmt(result.summary.minimumTax)} color="gold" />
+          <Row label={t.prepaymentCredit} value={fmt(result.summary.totalPrepaymentTax)} color="green" />
+          <div style={divider} />
+          <Row label={t.netPayableEnd} value={fmt(result.summary.finalPayable)} color={result.summary.finalPayable > 0 ? "red" : "green"} />
+          <div style={{ ...hint, marginTop: 8, padding: 8, background: "rgba(212,168,67,0.08)", borderRadius: 6, border: `1px solid ${border}` }}>
+            {result.summary.status}
+          </div>
+        </div>}
+        {result && result.error && <div style={{ ...resultBox, color: red }}>{result.error}</div>}
+      </div>
+      <div style={box}>
+        <strong style={{ color: gold2 }}>{lang==="en"?"Notes":"ចំណាំ"}:</strong> {t.notes}
       </div>
     </div>
   );
