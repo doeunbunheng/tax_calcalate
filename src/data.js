@@ -4,23 +4,23 @@
 export const T = {
   en: {
     appTitle: "Cambodia Tax Calculator",
-    appSub: "ITC Economy for Engineers | 13 Tax Calculators",
-    taxes13: "13 Taxes",
+    appSub: "ITC Economy for Engineers | 18 Tax Calculators",
+    taxes18: "18 Taxes",
     tabs: {
       overview: "Overview", salary: "Salary Tax", prepayment: "Prepayment Tax",
       vat: "VAT", special: "Special Tax", withholding: "Withholding Tax",
       lighting: "Public Lighting Tax", accommodation: "Accommodation Tax",
       dividend: "Dividend Tax", minimum: "Minimum Tax", rent: "Rent & Land Tax",
-      landtransfer: "Land Transfer Tax", property: "Property Tax", stamp: "Stamp Tax",
+      landtransfer: "Land Transfer Tax", property: "Property Tax",
       annual: "Annual Tax & Prepayment",
     },
     nav: { home: "Home", about: "About Taxes", allTaxes: "All Taxes", calculator: "Calculator" },
     home: {
       heroTitle: "Cambodia Tax Calculator",
-      heroSub: "Your comprehensive guide to all 13 taxes in the Kingdom of Cambodia. Calculate, understand, and comply with Cambodian tax law.",
+      heroSub: "Your comprehensive guide to all 18 taxes in the Kingdom of Cambodia. Calculate, understand, and comply with Cambodian tax law.",
       heroCta1: "Start Calculating",
       heroCta2: "Learn About Taxes",
-      stat1Label: "Tax Calculators", stat1Val: "13",
+      stat1Label: "Tax Calculators", stat1Val: "18",
       stat2Label: "Languages", stat2Val: "2",
       stat3Label: "Tax Categories", stat3Val: "4",
       stat4Label: "Free to Use", stat4Val: "100%",
@@ -29,7 +29,7 @@ export const T = {
       viewAll: "View All Taxes",
       howTitle: "How It Works",
       howSub: "Three simple steps to calculate your taxes",
-      step1Title: "Choose a Tax", step1Desc: "Select from 13 different tax types covering income, indirect, transaction, and advance taxes.",
+      step1Title: "Choose a Tax", step1Desc: "Select from 18 different tax types covering income, indirect, transaction, and advance taxes.",
       step2Title: "Enter Values", step2Desc: "Input your financial data including income, expenses, and applicable deductions.",
       step3Title: "Get Results", step3Desc: "Instantly see your tax liability, effective rate, and net amount with detailed breakdowns.",
       ctaTitle: "Ready to Calculate?",
@@ -38,18 +38,18 @@ export const T = {
     },
     about: {
       title: "About Cambodia Tax System",
-      sub: "Understanding the 13 taxes administered by the General Department of Taxation (GDT)",
+      sub: "Understanding the 18 taxes administered by the General Department of Taxation (GDT)",
       overviewTitle: "Tax System Overview",
-      overviewP1: "The Kingdom of Cambodia operates under a modern tax system administered by the General Department of Taxation (GDT) under the Ministry of Economy and Finance. The system includes 13 major taxes that businesses and individuals must understand and comply with.",
+      overviewP1: "The Kingdom of Cambodia operates under a modern tax system administered by the General Department of Taxation (GDT) under the Ministry of Economy and Finance. The system includes 18 major taxes that businesses and individuals must understand and comply with.",
       overviewP2: "Cambodia's tax system is designed to generate revenue for public services while promoting economic growth. Tax rates are generally competitive within the ASEAN region, making Cambodia an attractive destination for investment.",
       catTitle: "Tax Categories",
-      catSub: "The 13 taxes are organized into 4 main categories",
+      catSub: "The 18 taxes are organized into 4 main categories",
       cat1Title: "Income Taxes",
       cat1Desc: "Taxes on personal and business income, including salary tax, dividend tax, and minimum tax requirements.",
       cat2Title: "Indirect Taxes",
       cat2Desc: "Taxes on goods and services, including VAT, special excise taxes, public lighting tax, and accommodation tax.",
       cat3Title: "Transaction Taxes",
-      cat3Desc: "Taxes on property and asset transactions, including land transfer tax, property tax, stamp tax, and rental income tax.",
+      cat3Desc: "Taxes on property and asset transactions, including land transfer tax, property tax, and rental income tax.",
       cat4Title: "Advance & Withholding",
       cat4Desc: "Taxes deducted at source or paid in advance, including prepayment tax and withholding tax on various payments.",
       howTitle: "How to Use This Calculator",
@@ -72,7 +72,7 @@ export const T = {
       ],
     },
     allTaxes: {
-      title: "All 13 Tax Calculators",
+      title: "All 18 Tax Calculators",
       sub: "Browse and access all available tax calculators",
       searchPlaceholder: "Search taxes...",
       noResults: "No taxes found matching your search.",
@@ -218,23 +218,23 @@ export const T = {
   },
   kh: {
     appTitle: "ម៉ាស៊ីនគិតពន្ធកម្ពុជា",
-    appSub: "ITC សេដ្ឋកិច្ចសម្រាប់វិស្វករ | ម៉ាស៊ីនគិតពន្ធ ១៣ ប្រភេទ",
-    taxes13: "ពន្ធ ១៣",
+    appSub: "ITC សេដ្ឋកិច្ចសម្រាប់វិស្វករ | ម៉ាស៊ីនគិតពន្ធ ១៨ ប្រភេទ",
+    taxes18: "ពន្ធ ១៨",
     tabs: {
       overview: "ទិដ្ឋភាពទូទៅ", salary: "ពន្ធបៀវត្ស", prepayment: "ប្រាក់រំដោះពន្ធ",
       vat: "អាករ VAT", special: "អាករពិសេស", withholding: "ពន្ធកាត់ទុក",
       lighting: "ពន្ធបំភ្លឺសាធារណៈ", accommodation: "អាករស្នាក់នៅ",
       dividend: "ពន្ធភាគលាភ", minimum: "ពន្ធអប្បបរមា", rent: "ពន្ធជួលដី",
-      landtransfer: "ពន្ធផ្ទេរដី", property: "ពន្ធអចលនទ្រព្យ", stamp: "ពន្ធប្រថាប់ត្រា",
+      landtransfer: "ពន្ធផ្ទេរដី", property: "ពន្ធអចលនទ្រព្យ",
       annual: "ពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ",
     },
     nav: { home: "ទំព័រដើម", about: "អំពីពន្ធ", allTaxes: "ពន្ធទាំងអស់", calculator: "ម៉ាស៊ីនគិតពន្ធ" },
     home: {
       heroTitle: "ម៉ាស៊ីនគិតពន្ធកម្ពុជា",
-      heroSub: "មគ្គុទ្ទេសក៍ពេញលេញសម្រាប់ពន្ធទាំង ១៣ នៅព្រះរាជាណាចក្រកម្ពុជា។ គណនា យល់ និងអនុវត្តច្បាប់ពន្ធកម្ពុជា។",
+      heroSub: "មគ្គុទ្ទេសក៍ពេញលេញសម្រាប់ពន្ធទាំង ១៨ នៅព្រះរាជាណាចក្រកម្ពុជា។ គណនា យល់ និងអនុវត្តច្បាប់ពន្ធកម្ពុជា។",
       heroCta1: "ចាប់ផ្ដើមគណនា",
       heroCta2: "សិក្សាអំពីពន្ធ",
-      stat1Label: "ម៉ាស៊ីនគិតពន្ធ", stat1Val: "១៣",
+      stat1Label: "ម៉ាស៊ីនគិតពន្ធ", stat1Val: "១៨",
       stat2Label: "ភាសា", stat2Val: "២",
       stat3Label: "ប្រភេទពន្ធ", stat3Val: "៤",
       stat4Label: "ឥតគិតថ្លៃ", stat4Val: "១០០%",
@@ -243,7 +243,7 @@ export const T = {
       viewAll: "មើលពន្ធទាំងអស់",
       howTitle: "របៀបដំណើរការ",
       howSub: "ជំហាន ៣ យ៉ាងសម្រាប់គណនាពន្ធរបស់អ្នក",
-      step1Title: "ជ្រើសរើសពន្ធ", step1Desc: "ជ្រើសរើសពីប្រភេទពន្ធផ្សេងៗគ្នា ១៣ រួមមានពន្ធលើចំណូល ពន្ធប្រយោដន និងពន្ធបង់ជាមុន។",
+      step1Title: "ជ្រើសរើសពន្ធ", step1Desc: "ជ្រើសរើសពីប្រភេទពន្ធផ្សេងៗគ្នា ១៨ រួមមានពន្ធលើចំណូល ពន្ធប្រយោដន និងពន្ធបង់ជាមុន។",
       step2Title: "បញ្ចូលទឹកប្រាក់", step2Desc: "បញ្ចូលទិន្នន័យហិរញ្ញវត្ថុរបស់អ្នករួមមានចំណូល ចំណាយ និងការដកលើកលែង។",
       step3Title: "ទទួលលទ្ធផល", step3Desc: "មើលភ្លាមៗពន្ធដែលត្រូវបង់ អត្រាពន្ធជាក់ស្តែង និងចំនួនសុទ្ធជាមួយការបំបែកលម្អិត។",
       ctaTitle: "ត្រៀមគណនាហើយឬនៅ?",
@@ -252,18 +252,18 @@ export const T = {
     },
     about: {
       title: "អំពីប្រព័ន្ធពន្ធកម្ពុជា",
-      sub: "យល់ដឹងពីពន្ធទាំង ១៣ ដែលគ្រប់គ្រងដោយអគ្គនាយកដ្ឋានពន្ធនិងអាករ",
+      sub: "យល់ដឹងពីពន្ធទាំង ១៨ ដែលគ្រប់គ្រងដោយអគ្គនាយកដ្ឋានពន្ធនិងអាករ",
       overviewTitle: "ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធពន្ធ",
-      overviewP1: "ព្រះរាជាណាចក្រកម្ពុជាប្រើប្រាស់ប្រព័ន្ធពន្ធទំនើបដែលគ្រប់គ្រងដោយអគ្គនាយកដ្ឋានពន្ធនិងអាករ (GDT) ក្រោមក្រសួងសេដ្ឋកិច្ច និងហិរញ្ញវត្ថុ។ ប្រព័ន្ធនេះរួមមានពន្ធធំ ១៣ ប្រភេទដែលធុរកិច្ច និងបុគ្គលត្រូវយល់ដឹង និងអនុវត្ត។",
+      overviewP1: "ព្រះរាជាណាចក្រកម្ពុជាប្រើប្រាស់ប្រព័ន្ធពន្ធទំនើបដែលគ្រប់គ្រងដោយអគ្គនាយកដ្ឋានពន្ធនិងអាករ (GDT) ក្រោមក្រសួងសេដ្ឋកិច្ច និងហិរញ្ញវត្ថុ។ ប្រព័ន្ធនេះរួមមានពន្ធធំ ១៨ ប្រភេទដែលធុរកិច្ច និងបុគ្គលត្រូវយល់ដឹង និងអនុវត្ត។",
       overviewP2: "ប្រព័ន្ធពន្ធកម្ពុជាត្រូវបានរចនាឡើងដើម្បីបង្កើតចំណូលសម្រាប់សេវាសាធារណៈ ខណៈពេលផ្សព្វផ្សាយកំណើនសេដ្ឋកិច្ច។ អត្រាពន្ធជាទូទៅមានការប្រកួតប្រជែងក្នុងតំបន់អាស៊ាន។",
       catTitle: "ប្រភេទពន្ធ",
-      catSub: "ពន្ធទាំង ១៣ ត្រូវបានរៀបចំជា ៤ ប្រភេទសំខាន់",
+      catSub: "ពន្ធទាំង ១៨ ត្រូវបានរៀបចំជា ៤ ប្រភេទសំខាន់",
       cat1Title: "ពន្ធលើចំណូល",
       cat1Desc: "ពន្ធលើចំណូលបុគ្គល និងអាជីវកម្ម រួមមានពន្ធបៀវត្ស ពន្ធភាគលាភ និងពន្ធអប្បបរមា។",
       cat2Title: "ពន្ធប្រយោដន",
       cat2Desc: "ពន្ធលើទំនិញ និងសេវា រួមមាន VAT អាករពិសេស ពន្ធបំភ្លឺសាធារណៈ និងអាករស្នាក់នៅ។",
       cat3Title: "ពន្ធលើប្រតិបត្តិការ",
-      cat3Desc: "ពន្ធលើអចលនទ្រព្យ និងប្រតិបត្តិការសកម្មភាព រួមមានពន្ធផ្ទេរដី ពន្ធអចលនទ្រព្យ ពន្ធប្រថាប់ត្រា និងពន្ធលើប្រាក់ជួល។",
+      cat3Desc: "ពន្ធលើអចលនទ្រព្យ និងប្រតិបត្តិការសកម្មភាព រួមមានពន្ធផ្ទេរដី ពន្ធអចលនទ្រព្យ និងពន្ធលើប្រាក់ជួល។",
       cat4Title: "ពន្ធបង់ជាមុន និងកាត់ទុក",
       cat4Desc: "ពន្ធដែលកាត់នៅប្រភព ឬបង់ជាមុន រួមមានប្រាក់រំដោះពន្ធ និងពន្ធកាត់ទុក។",
       howTitle: "របៀបប្រើប្រាស់ម៉ាស៊ីនគិតពន្ធនេះ",
@@ -286,7 +286,7 @@ export const T = {
       ],
     },
     allTaxes: {
-      title: "ម៉ាស៊ីនគិតពន្ធទាំង ១៣",
+      title: "ម៉ាស៊ីនគិតពន្ធទាំង ១៨",
       sub: "រុករក និងចូលដំណើរការម៉ាស៊ីនគិតពន្ធទាំងអស់",
       searchPlaceholder: "ស្វែងរកពន្ធ...",
       noResults: "រកមិនឃើញពន្ធដែលត្រូវនឹងការស្វែងរករបស់អ្នកទេ។",
@@ -472,8 +472,13 @@ export function calcDividend(a, rate = 0.15) { const tax = a * (rate / 100); ret
 export function calcMinTax(r)              { return { tax: r*0.01 }; }
 export function calcRent(i)                { const tax = i*0.10; return { tax, net: i-tax }; }
 export function calcLandTransfer(v)        { return { tax: v*0.04 }; }
-export function calcPropertyTax(v, r)      { return { tax: v*(r/100) }; }
-export function calcStampTax(v, r)         { return { tax: v*(r/100) }; }
+export function calcPropertyTax(v) {
+  const base = v * 0.8 - 100000000;
+  const tax = base > 0 ? base * 0.001 : 0;
+  const effectiveRate = v > 0 ? (tax / v) * 100 : 0;
+  return { base: Math.max(0, base), exemption:100000000, eightyPct: v*0.8, tax, effectiveRate };
+}
+
 export function calculateAdvancedPrepaymentTax({
   monthlyIncomes,
   annualNetProfit,
@@ -536,7 +541,18 @@ export function calcSpecialProducer(p, r) { const base = 0.90*(p/1.10/(1+r)); re
 export function calcSpecialImport(cif, duty, r) { const base = cif + (parseFloat(duty)||0); return { base, tax: base*r }; }
 export function calcCorporateIncomeTax(p) { const tax = p*0.20; return { tax, rate:20, net: p-tax }; }
 export function calcNaturalResourceTax(p) { const tax = p*0.30; return { tax, rate:30 }; }
-export function calcQIPTax(p) { return { tax:0, rate:0 }; }
+export function calcQIPTax(projects) {
+  const results = (projects || []).map(p => {
+    const amount = parseFloat(p.amount) || 0;
+    const years = parseInt(p.incentiveYears) || 0;
+    const inIncentive = years > 0;
+    const rate = inIncentive ? 0 : 20;
+    const tax = amount * (rate / 100);
+    return { name: p.name || "", amount, incentiveYears: years, inIncentive, rate, tax };
+  });
+  const totalTax = results.reduce((s, r) => s + r.tax, 0);
+  return { projects: results, totalTax };
+}
 export function calcInsuranceTax(g, t) { const rate = t==="property"?0.05:0.20; return { tax: g*rate, rate:rate*100 }; }
 export function calcProgressiveIndividualTax(p) {
   let tax, bracket;
@@ -565,14 +581,14 @@ export const TAXES = [
   { id: "dividend", en: "Dividend Tax", kh: "ពន្ធភាគលាភ", cat: "income", icon: "", rate: "0%–20%", due: "When distributed", formulaEn: "Dividend × Rate", formulaKh: "ភាគលាភ × អត្រា", defEn: "Tax on profit distributed as dividends.", defKh: "ភាគលាភ គឺជាប្រាក់ ឬទ្រព្យសម្បត្តិដែលក្រុមហ៊ុនចែកឲ្យម្ចាស់ភាគហ៊ុន បន្ទាប់ពីក្រុមហ៊ុនមានប្រាក់ចំណេញ។ ពន្ធភាគលាភ គឺជាពន្ធដែលពាក់ព័ន្ធនឹងការចែកប្រាក់ចំណេញទៅម្ចាស់ភាគហ៊ុន។" },
   { id: "minimum", en: "Minimum Tax", kh: "ពន្ធអប្បបរមា", cat: "income", icon: "", rate: "1%", due: "Annual filing", formulaEn: "Revenue (excl. VAT) × 1%", formulaKh: "ចំណូលមិនរួម VAT × ១%", defEn: "Ensures enterprises pay at least 1% of annual turnover.", defKh: "ពន្ធអប្បបរមា គឺជាពន្ធដែលគណនាលើផលរបរប្រចាំឆ្នាំមិនរួម VAT។ វាត្រូវបានប្រើសម្រាប់ប្រៀបធៀបជាមួយពន្ធលើប្រាក់ចំណូល។ អត្រាគឺ ១% នៃផលរបរប្រចាំឆ្នាំមិនរួម VAT។" },
   { id: "rent", en: "Rent & Land Tax", kh: "ពន្ធជួលដីនិងអចលន", cat: "transaction", icon: "", rate: "10%", due: "Monthly", formulaEn: "Rental Income × 10%", formulaKh: "ប្រាក់ជួល × ១០%", defEn: "10% on rental income.", defKh: "ពន្ធឈ្នួលផ្ទះ និងដី គឺជាពន្ធដែលគិតលើប្រាក់ចំណូលពីការជួលផ្ទះ ដី អគារ ឬអចលនទ្រព្យផ្សេងៗ។ ជាទូទៅ វាត្រូវបានគិតក្នុងអត្រា ១០% លើប្រាក់ជួល។" },
-  { id: "landtransfer", en: "Land Transfer Tax", kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី គឺជាប្រភេទមួយនៃពន្ធប្រថាប់ត្រា ដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
-  { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%", due: "Annual", formulaEn: "Property Value × 0.1%", formulaKh: "តម្លៃ × ០.១%", defEn: "Annual tax on immovable property.", defKh: "ពន្ធលើអចលនទ្រព្យ គឺជាពន្ធដែលគិតលើការកាន់កាប់អចលនទ្រព្យ ដូចជា ដី ផ្ទះ អគារ ឬសំណង់។ ពន្ធនេះជាធម្មតាបង់ដោយម្ចាស់អចលនទ្រព្យ។" },
-  { id: "stamp", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "0.1%–1%", due: "At execution", formulaEn: "Document Value × Rate", formulaKh: "តម្លៃ × អត្រា", defEn: "Tax on official documents.", defKh: "ពន្ធប្រថាប់ត្រា គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិ ឬចុះបញ្ជីឯកសារផ្លូវការ។ វាអាចពាក់ព័ន្ធនឹងការផ្ទេរដី ផ្ទះ អគារ យានជំនិះ ឬភាគហ៊ុន។" },
+  { id: "landtransfer", en: "Land Transfer Tax", kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
+  { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%", due: "September 30", formulaEn: "(Total Value × 80% − 100M KHR) × 0.1%", formulaKh: "(តម្លៃ × ៨០% − ១០០លាន) × ០.១%", defEn: "Annual tax on immovable property. Base = 80% of value − 100M KHR exemption.", defKh: "ពន្ធលើអចលនទ្រព្យ គឺជាពន្ធប្រចាំឆ្នាំលើអចលនវត្ថុដូចជា ដី និងអគារ។ មូលដ្ឋានគិតពន្ធ = ៨០% នៃតម្លៃសរុប − ១០០លានរៀល។" },
+
   { id: "corporate", en: "Corporate Income Tax", kh: "ពន្ធនីតិបុគ្គល", cat: "income", icon: "", rate: "20%", due: "Annual filing", formulaEn: "Taxable Income × 20%", formulaKh: "ចំណូលជាប់ពន្ធ × ២០%", defEn: "Tax on net profit of companies.", defKh: "ពន្ធលើប្រាក់ចំណូលនីតិបុគ្គល គឺជាពន្ធដែលគណនាលើប្រាក់ចំណេញជាប់ពន្ធរបស់ក្រុមហ៊ុន ឬនីតិបុគ្គល។ ប្រាក់ចំណេញជាប់ពន្ធអាចខុសពីប្រាក់ចំណេញក្នុងគណនេយ្យ ព្រោះត្រូវមានការកែតម្រូវតាមច្បាប់ពន្ធ។" },
   { id: "naturalresource", en: "Natural Resource Tax", kh: "ពន្ធធនធានធម្មជាតិ", cat: "income", icon: "", rate: "30%", due: "Annual filing", formulaEn: "Revenue × 30%", formulaKh: "ចំណូល × ៣០%", defEn: "Tax on oil, gas, and mining revenue.", defKh: "ពន្ធលើប្រាក់ចំណូលធនធានធម្មជាតិ គឺជាពន្ធលើប្រាក់ចំណូលពីអាជីវកម្មធនធានធម្មជាតិ ដូចជា ប្រេងកាត ឧស្ម័នធម្មជាតិ រ៉ែមាស ត្បូងមានតម្លៃ ឬធនធានធម្មជាតិផ្សេងៗ។ អត្រាពន្ធគឺ ៣០%។" },
   { id: "qip", en: "QIP Tax", kh: "ពន្ធ QIP", cat: "income", icon: "", rate: "0%–20%", due: "Per QIP schedule", formulaEn: "Profit × QIP Rate", formulaKh: "ប្រាក់ចំណេញ × អត្រា QIP", defEn: "Tax for Qualified Investment Projects.", defKh: "QIP មានន័យថា គម្រោងវិនិយោគមានលក្ខណៈសម្បត្តិគ្រប់គ្រាន់។ សម្រាប់គម្រោង QIP ដែលស្ថិតក្នុងរយៈពេលលើកលែងពន្ធ អត្រាពន្ធលើប្រាក់ចំណូលអាចជា ០%។" },
   { id: "insurance", en: "Insurance Tax", kh: "ពន្ធធានារ៉ាប់រង", cat: "income", icon: "", rate: "5%–20%", due: "Monthly/Quarterly", formulaEn: "Premium × 5% or 20%", formulaKh: "បុព្វលាភ × ៥% ឬ ២០%", defEn: "Special tax for insurance enterprises.", defKh: "ពន្ធលើសហគ្រាសធានារ៉ាប់រង គឺជាពន្ធសម្រាប់ក្រុមហ៊ុនធានារ៉ាប់រង។ សម្រាប់ធានារ៉ាប់រងលើទ្រព្យសម្បត្តិ ឬហានិភ័យ អត្រា ៥% លើបុព្វលាភធានារ៉ាប់រងដុល។ សម្រាប់ធានារ៉ាប់រងជីវិត ឬសកម្មភាពផ្សេងៗ ប្រើអត្រា ២០%។" },
-  { id: "progressive", en: "Progressive Tax", kh: "ពន្ធសហគ្រាសឯកបុគ្គល", cat: "income", icon: "", rate: "0%–20%", due: "Annual filing", formulaEn: "Progressive rates with offsets", formulaKh: "អត្រាកំណើន", defEn: "Progressive tax for sole proprietors.", defKh: "ពន្ធនេះគិតលើប្រាក់ចំណូលប្រចាំឆ្នាំរបស់រូបវន្តបុគ្គល សហគ្រាសឯកបុគ្គល ឬចំណែកដែលបែងចែកឲ្យសមាជិកក្នុងក្រុមហ៊ុនសហកម្មសិទ្ធិ។ វាប្រើអត្រាកំណើនតាមថ្នាក់។" },
+  { id: "progressive", en: "Personal Enterprise Income Tax", kh: "ពន្ធសហគ្រាសឯកបុគ្គល", cat: "income", icon: "", rate: "0%–20%", due: "Annual filing", formulaEn: "Profit × Rate − Offset (progressive brackets)", formulaKh: "ប្រាក់ចំណេញ × អត្រា − ការដក (តាមជាន់ថ្នាក់)", defEn: "Annual progressive tax on net profit of sole proprietors and personal enterprises.", defKh: "ពន្ធសហគ្រាសឯកបុគ្គលគឺជាពន្ធដែលក្រុមហ៊ុនឯកជន ឬសហគ្រាសឯកជនបង់លើប្រាក់ចំណេញ (Profit) ដែលក្រុមហ៊ុនរកបានក្នុងមួយឆ្នាំ។ អត្រាពន្ធត្រូវបានកំណត់តាមស្ដង់ដារ និងតាមលំដាប់ប្រាក់ចំណេញ។" },
   { id: "taxadjustment", en: "Taxable Income Adjustment", kh: "ការគណនាចំណូលជាប់ពន្ធ", cat: "income", icon: "", rate: "—", due: "Before filing", formulaEn: "Accounting Profit +/− Adjustments", formulaKh: "ប្រាក់ចំណេញ ± កែតម្រូវ", defEn: "Reconcile accounting to taxable income.", defKh: "ការគណនាប្រាក់ចំណូលជាប់ពន្ធ គឺជាដំណើរការកែតម្រូវប្រាក់ចំណេញតាមគណនេយ្យ ដើម្បីរកប្រាក់ចំណូលដែលត្រូវយកទៅគណនាពន្ធ។ ចំណាយខ្លះមិនអាចកាត់កងបាន ហើយចំណូលខ្លះមិនជាប់ពន្ធ ដូច្នេះត្រូវកែតម្រូវមុនគណនាពន្ធ។" },
   { id: "annual", en: "Annual Tax & Prepayment", kh: "ពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ", cat: "income", icon: "", rate: "1%–20%", due: "Annual filing", formulaEn: "Net Profit × 20% or Base × 1%", formulaKh: "ចំណេញ × ២០% ឬ Base × ១%", defEn: "Annual profit tax with minimum tax floor and monthly prepayment credit.", defKh: "ពន្ធប្រចាំឆ្នាំ រួមបញ្ចូលការគណនាពន្ធលើប្រាក់ចំណេញសុទ្ធ និងពន្ធអប្បបរមា។ ប្រសិនបើក្រុមហ៊ុនមានប្រាក់ចំណេញ ត្រូវបង់ពន្ធ ២០% នៃប្រាក់ចំណេញ។ ប្រសិនបើក្រុមហ៊ុនខាតបង់ ត្រូវបង់តែពន្ធអប្បបរមា ១% នៃផលរបរ។" },
 ];
