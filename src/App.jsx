@@ -38,8 +38,8 @@ const S = {
 
 const navLink = (active) => ({ padding: "8px 14px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: active ? gold : muted, background: active ? "rgba(212,168,67,0.12)" : "transparent", border: "none", borderRadius: 8, transition: "all 0.2s" });
 const langBtn = (a) => ({ padding: "6px 12px", borderRadius: 20, cursor: "pointer", border: `1px solid ${a ? gold : border}`, background: a ? "rgba(212,168,67,0.2)" : "transparent", color: a ? gold : muted, fontWeight: 600, fontSize: "0.72rem", transition: "all 0.2s" });
-const logoImg = { width: 60, height: 60, borderRadius: "50%", objectFit: "cover" };
-const logoImgMob = { width: 40, height: 40, borderRadius: "50%", objectFit: "cover" };
+const logoImg = { width: 80, height: 80, borderRadius: "50%", objectFit: "cover" };
+const logoImgMob = { width: 56, height: 56, borderRadius: "50%", objectFit: "cover" };
 
 const navKeys = ["home", "about", "taxes", "calculator"];
 const navPath = (k) => `#/${k === "home" ? "" : k}`;
@@ -186,10 +186,10 @@ function HomePage({ lang, navigate }) {
 function AboutPage({ lang, navigate }) {
   const t = T[lang].about;
   const cats = [
-    { icon: "💰", title: t.cat1Title, desc: t.cat1Desc, filter: "income" },
-    { icon: "🧾", title: t.cat2Title, desc: t.cat2Desc, filter: "indirect" },
-    { icon: "🏠", title: t.cat3Title, desc: t.cat3Desc, filter: "transaction" },
-    { icon: "🏦", title: t.cat4Title, desc: t.cat4Desc, filter: "advance" },
+    { title: t.cat1Title, desc: t.cat1Desc, filter: "income" },
+    { title: t.cat2Title, desc: t.cat2Desc, filter: "indirect" },
+    { title: t.cat3Title, desc: t.cat3Desc, filter: "transaction" },
+    { title: t.cat4Title, desc: t.cat4Desc, filter: "advance" },
   ];
   return (
     <div className="page-enter" style={S.page}>
@@ -206,7 +206,7 @@ function AboutPage({ lang, navigate }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 16, marginBottom: 32 }}>
           {cats.map((c, i) => (
             <div key={i} className="card-hover" style={{ ...S.card, cursor: "pointer" }} onClick={() => navigate(`#/taxes?cat=${c.filter}`)}>
-              <div style={{ fontSize: "1.8rem", marginBottom: 8 }}>{c.icon}</div>
+              
               <div style={{ color: gold2, fontWeight: 700, fontSize: "0.88rem", marginBottom: 6 }}>{c.title}</div>
               <div style={{ color: "#B8C8DC", fontSize: "0.78rem", lineHeight: 1.7 }}>{c.desc}</div>
             </div>
