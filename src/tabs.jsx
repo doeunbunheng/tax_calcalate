@@ -61,7 +61,7 @@ export function OverviewTab({ lang }) {
     { en: "Dividend Tax",        kh: "ពន្ធភាគលាភ",                  def_en: "15% on profit distributed as dividends.", def_kh: "១៥% លើភាគលាភ",                                              formula: lang==="en"?"Dividend × 15%":"ភាគលាភ × ១៥%" },
     { en: "Minimum Tax",         kh: "ពន្ធអប្បបរមា",                 def_en: "Ensures all enterprises pay at least 1% of gross annual revenue (excl. VAT).", def_kh: "ពន្ធអប្បបរមា ១% នៃចំណូល (មិនរួម VAT)",              formula: lang==="en"?"Revenue (excl. VAT) × 1% (pay higher of this or Profit Tax)":"ចំណូល (មិនរួម VAT) × ១%" },
     { en: "Rent & Land Tax",     kh: "ពន្ធជួលអចលនទ្រព្យ",            def_en: "10% on rental income from property and land.", def_kh: "១០% លើប្រាក់ចំណូលពីការជួលអចលនទ្រព្យ",                  formula: lang==="en"?"Rental Income × 10%":"ប្រាក់ជួល × ១០%" },
-    { en: "Land Transfer Tax",   kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី",          def_en: "4% on sale price when transferring land or property ownership.", def_kh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ",                  formula: lang==="en"?"Sale Price × 4%":"តម្លៃ × ៤%" },
+    { en: "Stamp Tax",   kh: "ពន្ធប្រថាប់ត្រា",          def_en: "4% on sale price when transferring land or property ownership.", def_kh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ",                  formula: lang==="en"?"Sale Price × 4%":"តម្លៃ × ៤%" },
     { en: "Property Tax",        kh: "ពន្ធអចលនទ្រព្យ",               def_en: "Annual tax on property value at 0.1% to 1%.", def_kh: "ពន្ធប្រចាំឆ្នាំ ០.១% ដល់ ១% លើអចលនទ្រព្យ",          formula: lang==="en"?"Property Value × Rate (0.1%–1%)":"តម្លៃ × អត្រា (០.១%-១%)" },
   ];
   return (
@@ -666,8 +666,6 @@ export function AccommodationTab({ lang }) {
 // 8. DIVIDEND TAX
 // ═══════════════════════════════════════════════════════════
 const DIVIDEND_CASES = {
-  listed_share:{label:"Trading shares on Cambodia Securities Exchange (CSX)",label_kh:"ការលក់ភាគហ៊ុននៅផ្សារមូលបត្រកម្ពុជា",rate:0,note:"0% exemption for listed shares",note_kh:"លើកលែង ០% សម្រាប់ភាគហ៊ុននៅ CSX"},
-  resident_entity:{label:"Resident entity → Resident entity (CIT already paid)",label_kh:"ក្រុមហ៊ុននិវាសនជន → ក្រុមហ៊ុននិវាសនជន (បានបង់ CIT)",rate:0,note:"0% — CIT already paid",note_kh:"០% — បានបង់ CIT រួចហើយ"},
   resident_individual:{label:"Resident shareholder (company paid CIT)",label_kh:"ម្ចាស់ភាគហ៊ុននិវាសនជន (ក្រុមហ៊ុនបានបង់ CIT)",rate:0,note:"0% — no need to pay dividend tax again",note_kh:"០% — មិនចាំបាច់បង់ពន្ធភាគលាភទៀតទេ"},
   nonresident:{label:"Non-resident shareholder (no DTA)",label_kh:"ម្ចាស់ភាគហ៊ុនអនិវាសនជន (គ្មាន DTA)",rate:14,note:"14% withholding tax",note_kh:"កាត់ទុក ១៤%"},
   nonresident_dta:{label:"Non-resident shareholder (with DTA)",label_kh:"ម្ចាស់ភាគហ៊ុនអនិវាសនជន (មាន DTA)",rate:10,note:"Reduced to 10% under DTA",note_kh:"បន្ថយមក ១០% ក្រោមសន្ធិសញ្ញា DTA"},
@@ -675,7 +673,7 @@ const DIVIDEND_CASES = {
 export function DividendTab({ lang }) {
   const tabName = T[lang].tabs.dividend;
   const [amount, setAmount] = useState("");
-  const [caseType, setCaseType] = useState("resident_entity");
+  const [caseType, setCaseType] = useState("resident_individual");
   const [result, setResult] = useState(null);
   useEffect(() => {
     const a = parseFloat(amount) || 0;
@@ -740,40 +738,30 @@ export function DividendTab({ lang }) {
 // ═══════════════════════════════════════════════════════════
 export function MinimumTaxTab({ lang }) {
   const [rev, setRev] = useState("");
-  const [pt, setPt] = useState("");
   const [result, setResult] = useState(null);
   const doCalc = useCallback(() => {
     const r=parseFloat(rev)||0;
     if (r<=0) { setResult(null); return; }
-    const p=parseFloat(pt)||0;
     const mt=calcMinTax(r);
-    setResult({...mt,revenue:r,profitTax:p,finalTax:Math.max(mt.tax,p),applicable:mt.tax>p});
-  }, [rev, pt]);
+    setResult({...mt,revenue:r});
+  }, [rev]);
   useEffect(() => { doCalc(); }, [doCalc]);
   return (
     <div>
       <div style={title}>{lang==="en"?"Minimum Tax — ពន្ធអប្បបរមា":"ពន្ធអប្បបរមា"}</div>
-      <div style={subt}>{lang==="en"?"1% of gross revenue (excl. VAT). Pay higher of Minimum Tax or Profit Tax.":"ពន្ធ ១% នៃចំណូល (មិនរួម VAT)។ បង់ចំនួនខ្ពស់ជាងពន្ធចំណេញ។"}</div>
+      <div style={subt}>{lang==="en"?"1% of gross revenue (excl. VAT)":"ពន្ធ ១% នៃចំណូល (មិនរួម VAT)"}</div>
       <div style={box}>
-        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Revenue (excl. VAT) × 1%":"ចំណូល (មិនរួម VAT) × ១%"}<br />
-        <strong style={{ color: gold2 }}>{lang==="en"?"Rule":"ច្បាប់"}:</strong> {lang==="en"?"Pay MAX(Minimum Tax, Profit Tax)":"បង់ MAX(ពន្ធអប្បបរមា, ពន្ធចំណេញ)"}
+        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Revenue (excl. VAT) × 1%":"ចំណូល (មិនរួម VAT) × ១%"}
       </div>
       <div style={grid}>
         <div className="card-hover" style={calcCard}>
           <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Calculator":"ម៉ាស៊ីនគិតពន្ធ"}</div>
           <label style={label}>{lang==="en"?"Annual Gross Revenue (excl. VAT) (KHR)":"ចំណូលប្រចាំឆ្នាំ (មិនរួម VAT) (រៀល)"}</label>
           <input className="input-focus" style={input} type="number" placeholder="e.g. 5000000" value={rev} onChange={e=>setRev(e.target.value)} />
-          <label style={label}>{lang==="en"?"Actual Profit Tax (optional)":"ពន្ធចំណេញជាក់ស្ដែង (ស្រេចចិត្ត)"}</label>
-          <input className="input-focus" style={input} type="number" placeholder="0" value={pt} onChange={e=>setPt(e.target.value)} />
           <button style={btn} onClick={doCalc}>{lang==="en"?"Calculate Minimum Tax":"គណនាពន្ធអប្បបរមា"}</button>
           {result && <div className="result-fade" style={resultBox}>
             <Row label={lang==="en"?"Annual Revenue":"ចំណូល"} value={fmt(result.revenue)} />
             <Row label={lang==="en"?"Minimum Tax (1%)":"ពន្ធអប្បបរមា (១%)"} value={fmt(result.tax)} color="red" />
-            {result.profitTax>0 && <>
-              <Row label={lang==="en"?"Profit Tax":"ពន្ធចំណេញ"} value={fmt(result.profitTax)} />
-              <Row label={lang==="en"?"Tax to Pay (higher)":"ពន្ធត្រូវបង់"} value={fmt(result.finalTax)} color="gold" />
-              <Row label={lang==="en"?"Minimum Tax Applies?":"ពន្ធអប្បបរមាអនុវត្ត?"} value={result.applicable?(lang==="en"?"YES":"បាទ/ចាស"):(lang==="en"?"NO":"ទេ")} color={result.applicable?"red":"green"} />
-            </>}
           </div>}
         </div>
         <div className="card-hover" style={calcCard}>
@@ -826,7 +814,7 @@ export function LandTransferTab({ lang }) {
   }, [val]);
   return (
     <div>
-      <div style={title}>{lang==="en"?"Land Transfer Tax":"ពន្ធផ្ទេរកម្មសិទ្ធិដី"}</div>
+      <div style={title}>{lang==="en"?"Stamp Tax":"ពន្ធប្រថាប់ត្រា"}</div>
       <div style={subt}>{lang==="en"?"4% on sale price when transferring land/property ownership.":"៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិដីធ្លី ឬអចលនទ្រព្យ។"}</div>
       <div style={box}>
         <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Sale Price × 4%":"តម្លៃលក់ × ៤%"}<br />
@@ -841,7 +829,7 @@ export function LandTransferTab({ lang }) {
           <button style={btn} onClick={()=>setResult(calcLandTransfer(parseFloat(val)||0))}>{lang==="en"?"Calculate":"គណនា"}</button>
           {result && <div className="result-fade" style={resultBox}>
             <Row label={lang==="en"?"Sale Price":"តម្លៃលក់"} value={fmt(parseFloat(val))} />
-            <Row label={lang==="en"?"Land Transfer Tax (4%)":"ពន្ធផ្ទេរ (៤%)"} value={fmt(result.tax)} color="red" />
+            <Row label={lang==="en"?"Stamp Tax (4%)":"ពន្ធប្រថាប់ត្រា (៤%)"} value={fmt(result.tax)} color="red" />
             <Row label={lang==="en"?"Total Cost":"ថ្លៃដើមសរុប"} value={fmt(parseFloat(val)+result.tax)} color="gold" />
           </div>}
         </div>
@@ -852,7 +840,7 @@ export function LandTransferTab({ lang }) {
               <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Tax Type":"ប្រភេទពន្ធ"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Description":"បរិយាយ"}</th></tr>
             </thead>
             <tbody>
-              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}><div style={{fontWeight:600}}>{lang==="en"?"Land Transfer Tax":"ពន្ធផ្ទេរកម្មសិទ្ធិដី"}</div></td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>4%</td><td style={{padding:"5px 6px",color:muted,fontSize:"0.62rem"}}>{lang==="en"?"Charged on sale/transfer of land ownership.":"ប្រមូលលើការលក់/ផ្ទេរកម្មសិទ្ធិដីធ្លី។"}</td></tr>
+              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}><div style={{fontWeight:600}}>{lang==="en"?"Stamp Tax":"ពន្ធប្រថាប់ត្រា"}</div></td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>4%</td><td style={{padding:"5px 6px",color:muted,fontSize:"0.62rem"}}>{lang==="en"?"Charged on sale/transfer of land ownership.":"ប្រមូលលើការលក់/ផ្ទេរកម្មសិទ្ធិដីធ្លី។"}</td></tr>
 
             </tbody>
           </table>

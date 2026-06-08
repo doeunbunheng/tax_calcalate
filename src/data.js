@@ -225,7 +225,7 @@ export const T = {
       vat: "អាករ VAT", special: "អាករពិសេស", withholding: "ពន្ធកាត់ទុក",
       lighting: "ពន្ធបំភ្លឺសាធារណៈ", accommodation: "អាករស្នាក់នៅ",
       dividend: "ពន្ធភាគលាភ", minimum: "ពន្ធអប្បបរមា", rent: "ពន្ធជួលដី",
-      landtransfer: "ពន្ធផ្ទេរដី", property: "ពន្ធអចលនទ្រព្យ",
+      landtransfer: "ពន្ធប្រថាប់ត្រា", property: "ពន្ធអចលនទ្រព្យ",
       annual: "ពន្ធប្រចាំឆ្នាំ និងរំដោះពន្ធ",
     },
     nav: { home: "ទំព័រដើម", about: "អំពីពន្ធ", allTaxes: "ពន្ធទាំងអស់", calculator: "ម៉ាស៊ីនគិតពន្ធ" },
@@ -581,7 +581,7 @@ export const TAXES = [
   { id: "dividend", en: "Dividend Tax", kh: "ពន្ធភាគលាភ", cat: "income", icon: "", rate: "0%–20%", due: "When distributed", formulaEn: "Dividend × Rate", formulaKh: "ភាគលាភ × អត្រា", defEn: "Tax on profit distributed as dividends.", defKh: "ភាគលាភ គឺជាប្រាក់ ឬទ្រព្យសម្បត្តិដែលក្រុមហ៊ុនចែកឲ្យម្ចាស់ភាគហ៊ុន បន្ទាប់ពីក្រុមហ៊ុនមានប្រាក់ចំណេញ។ ពន្ធភាគលាភ គឺជាពន្ធដែលពាក់ព័ន្ធនឹងការចែកប្រាក់ចំណេញទៅម្ចាស់ភាគហ៊ុន។" },
   { id: "minimum", en: "Minimum Tax", kh: "ពន្ធអប្បបរមា", cat: "income", icon: "", rate: "1%", due: "Annual filing", formulaEn: "Revenue (excl. VAT) × 1%", formulaKh: "ចំណូលមិនរួម VAT × ១%", defEn: "Ensures enterprises pay at least 1% of annual turnover.", defKh: "ពន្ធអប្បបរមា គឺជាពន្ធដែលគណនាលើផលរបរប្រចាំឆ្នាំមិនរួម VAT។ វាត្រូវបានប្រើសម្រាប់ប្រៀបធៀបជាមួយពន្ធលើប្រាក់ចំណូល។ អត្រាគឺ ១% នៃផលរបរប្រចាំឆ្នាំមិនរួម VAT។" },
   { id: "rent", en: "Rent & Land Tax", kh: "ពន្ធជួលដីនិងអចលន", cat: "transaction", icon: "", rate: "10%", due: "Monthly", formulaEn: "Rental Income × 10%", formulaKh: "ប្រាក់ជួល × ១០%", defEn: "10% on rental income.", defKh: "ពន្ធឈ្នួលផ្ទះ និងដី គឺជាពន្ធដែលគិតលើប្រាក់ចំណូលពីការជួលផ្ទះ ដី អគារ ឬអចលនទ្រព្យផ្សេងៗ។ ជាទូទៅ វាត្រូវបានគិតក្នុងអត្រា ១០% លើប្រាក់ជួល។" },
-  { id: "landtransfer", en: "Land Transfer Tax", kh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធផ្ទេរកម្មសិទ្ធិដី គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
+  { id: "landtransfer", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធប្រថាប់ត្រា គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
   { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%", due: "September 30", formulaEn: "(Total Value × 80% − 100M KHR) × 0.1%", formulaKh: "(តម្លៃ × ៨០% − ១០០លាន) × ០.១%", defEn: "Annual tax on immovable property. Base = 80% of value − 100M KHR exemption.", defKh: "ពន្ធលើអចលនទ្រព្យ គឺជាពន្ធប្រចាំឆ្នាំលើអចលនវត្ថុដូចជា ដី និងអគារ។ មូលដ្ឋានគិតពន្ធ = ៨០% នៃតម្លៃសរុប − ១០០លានរៀល។" },
 
   { id: "corporate", en: "Corporate Income Tax", kh: "ពន្ធនីតិបុគ្គល", cat: "income", icon: "", rate: "20%", due: "Annual filing", formulaEn: "Taxable Income × 20%", formulaKh: "ចំណូលជាប់ពន្ធ × ២០%", defEn: "Tax on net profit of companies.", defKh: "ពន្ធលើប្រាក់ចំណូលនីតិបុគ្គល គឺជាពន្ធដែលគណនាលើប្រាក់ចំណេញជាប់ពន្ធរបស់ក្រុមហ៊ុន ឬនីតិបុគ្គល។ ប្រាក់ចំណេញជាប់ពន្ធអាចខុសពីប្រាក់ចំណេញក្នុងគណនេយ្យ ព្រោះត្រូវមានការកែតម្រូវតាមច្បាប់ពន្ធ។" },
