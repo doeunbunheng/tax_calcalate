@@ -769,7 +769,7 @@ export function MinimumTaxTab({ lang }) {
 // ═══════════════════════════════════════════════════════════
 export function RentLandTab({ lang }) {
   return <SimpleCalcTab lang={lang}
-    titleEn="Rent & Land Tax" titleKh="ពន្ធជួលដីនិងអចលន"
+    titleEn="Rent & Land Tax" titleKh="ពន្ធជួលដីនិងអចលនទ្រព្យ"
     subEn="10% on rental income from property and land." subKh="១០% លើប្រាក់ចំណូលពីការជួល"
     boxContent={(l)=><><strong style={{color:gold2}}>{l==="en"?"Formula":"រូបមន្ត"}:</strong> {l==="en"?"Rental Income × 10%":"ប្រាក់ជួល × ១០%"}</>}
     labelEn="Rental Income (KHR)" labelKh="ប្រាក់ចំណូលពីការជួល (រៀល)"
