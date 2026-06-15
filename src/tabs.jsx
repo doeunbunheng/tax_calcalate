@@ -61,7 +61,7 @@ export function OverviewTab({ lang }) {
     { en: "Dividend Tax",        kh: "ពន្ធភាគលាភ",                  def_en: "15% on profit distributed as dividends.", def_kh: "១៥% លើភាគលាភ",                                              formula: lang==="en"?"Dividend × 15%":"ភាគលាភ × ១៥%" },
     { en: "Minimum Tax",         kh: "ពន្ធអប្បបរមា",                 def_en: "Ensures all enterprises pay at least 1% of gross annual revenue (excl. VAT).", def_kh: "ពន្ធអប្បបរមា ១% នៃចំណូល (មិនរួម VAT)",              formula: lang==="en"?"Revenue (excl. VAT) × 1% (pay higher of this or Profit Tax)":"ចំណូល (មិនរួម VAT) × ១%" },
     { en: "Rent & Land Tax",     kh: "ពន្ធជួលអចលនទ្រព្យ",            def_en: "10% on rental income from property and land.", def_kh: "១០% លើប្រាក់ចំណូលពីការជួលអចលនទ្រព្យ",                  formula: lang==="en"?"Rental Income × 10%":"ប្រាក់ជួល × ១០%" },
-    { en: "Stamp Tax",   kh: "ពន្ធប្រថាប់ត្រា",          def_en: "4% on sale price when transferring land or property ownership.", def_kh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ",                  formula: lang==="en"?"Sale Price × 4%":"តម្លៃ × ៤%" },
+    { en: "Stamp Tax",   kh: "ពន្ធប្រថាប់ត្រា",          def_en: "4% stamp duty on land/property transfer.", def_kh: "៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិ",                  formula: lang==="en"?"Sale Price × 4%":"តម្លៃ × ៤%" },
     { en: "Property Tax",        kh: "ពន្ធអចលនទ្រព្យ",               def_en: "Annual tax on property value at 0.1% to 1%.", def_kh: "ពន្ធប្រចាំឆ្នាំ ០.១% ដល់ ១% លើអចលនទ្រព្យ",          formula: lang==="en"?"Property Value × Rate (0.1%–1%)":"តម្លៃ × អត្រា (០.១%-១%)" },
   ];
   return (
@@ -815,7 +815,7 @@ export function LandTransferTab({ lang }) {
   return (
     <div>
       <div style={title}>{lang==="en"?"Stamp Tax":"ពន្ធប្រថាប់ត្រា"}</div>
-      <div style={subt}>{lang==="en"?"4% on sale price when transferring land/property ownership.":"៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិដីធ្លី ឬអចលនទ្រព្យ។"}</div>
+      <div style={subt}>{lang==="en"?"4% stamp duty on land/property transfer.":"៤% លើតម្លៃលក់ពេលផ្ទេរកម្មសិទ្ធិដីធ្លី ឬអចលនទ្រព្យ។"}</div>
       <div style={box}>
         <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Sale Price × 4%":"តម្លៃលក់ × ៤%"}<br />
         <strong style={{ color: gold2 }}>{lang==="en"?"What it applies to":"អនុវត្តលើ"}:</strong> {lang==="en"?"Transfer of land, houses, buildings, and immovable property.":"ការផ្ទេរដី ផ្ទះ អគារ និងអចលនទ្រព្យផ្សេងៗ។"}<br />
@@ -1003,96 +1003,269 @@ export function NaturalResourceTaxTab({ lang }) {
 // ═══════════════════════════════════════════════════════════
 // 16. QIP TAX
 // ═══════════════════════════════════════════════════════════
-export function QIPTaxTab({ lang }) {
-  const [projects, setProjects] = useState([{ name: "", amount: "", incentiveYears: "" }]);
-  const [result, setResult] = useState(null);
-  const addProject = () => setProjects([...projects, { name: "", amount: "", incentiveYears: "" }]);
-  const removeProject = (i) => { if (projects.length > 1) { const c = [...projects]; c.splice(i, 1); setProjects(c); } };
-  const updateProject = (i, field, val) => { const c = [...projects]; c[i][field] = val; setProjects(c); };
-  const doCalc = () => {
-    const parsed = projects.map(p => ({ name: p.name, amount: parseFloat(p.amount) || 0, incentiveYears: parseInt(p.incentiveYears) || 0 }));
-    const r = calcQIPTax(parsed);
-    setResult(r);
+function QIPProjectCard({ project, onUpdate, onRemove, lang }) {
+  const GROUP_YEARS = { 1: 9, 2: 6, 3: 3 };
+  const hYears = GROUP_YEARS[parseInt(project.group)] || 6;
+  const yr = parseInt(project.year) || 0;
+  const amt = parseFloat(project.profit) || 0;
+
+  let rate = 0, phase = "";
+  if (yr > 0 && amt >= 0) {
+    if (yr <= hYears) { rate = 0; phase = "holiday"; }
+    else if (yr <= hYears + 2) { rate = 5; phase = "transition_early"; }
+    else if (yr <= hYears + 4) { rate = 10; phase = "transition_mid"; }
+    else if (yr <= hYears + 6) { rate = 15; phase = "transition_late"; }
+    else { rate = 20; phase = "full"; }
+  }
+  const tax = amt * (rate / 100);
+
+  const P = {
+    holiday:     { label: lang==="en"?"Tax Holiday (0%)":"លើកលែងពន្ធ (០%)",       color: green, bar: "#27AE60" },
+    transition_early: { label: lang==="en"?"Transition Yr 1-2 · 5%":"អន្តរកាល ឆ្នាំ១-២ · ៥%", color: "#F0C96A", bar: "#F0C96A" },
+    transition_mid:  { label: lang==="en"?"Transition Yr 3-4 · 10%":"អន្តរកាល ឆ្នាំ៣-៤ · ១០%", color: gold, bar: "#D4A843" },
+    transition_late: { label: lang==="en"?"Transition Yr 5-6 · 15%":"អន្តរកាល ឆ្នាំ៥-៦ · ១៥%", color: "#C58A20", bar: "#C58A20" },
+    full:        { label: lang==="en"?"Full Rate · 20%":"អត្រាពេញ · ២០%",    color: red, bar: "#E63946" },
   };
+  const phaseData = P[phase];
+  const totalYears = hYears + 6;
+  const segments = [
+    { label: lang==="en"?"Holiday":"លើកលែង", years: hYears, color: "#27AE60", start: 1, end: hYears },
+    { label: "5%", years: 2, color: "#F0C96A", start: hYears + 1, end: hYears + 2 },
+    { label: "10%", years: 2, color: "#D4A843", start: hYears + 3, end: hYears + 4 },
+    { label: "15%", years: 2, color: "#C58A20", start: hYears + 5, end: hYears + 6 },
+    { label: "20%", years: 3, color: "#E63946", start: hYears + 7, end: hYears + 9 },
+  ];
+
+  const update = (key, val) => onUpdate(project.id, { ...project, [key]: val });
+
   return (
     <div>
-      <div style={title}>{lang==="en"?"QIP Tax — ពន្ធ QIP":"ពន្ធ QIP"}</div>
-      <div style={subt}>{lang==="en"?"Tax for Qualified Investment Projects. 0% during tax holiday (up to 9 years), 20% after.":"ពន្ធសម្រាប់គម្រោងវិនិយោគ។ ០% អំឡុងពេលលើកលែង (រហូត ៩ឆ្នាំ), ២០% ក្រោយ។"}</div>
-      <div style={box}>
-        <strong style={{ color: gold2 }}>{lang==="en"?"Formula":"រូបមន្ត"}:</strong> {lang==="en"?"Investment × Rate":"ទឹកប្រាក់ × អត្រា"}<br />
-        <strong style={{ color: gold2 }}>{lang==="en"?"Rate":"អត្រា"}:</strong> {lang==="en"?"0% (within incentive period) | 20% (expired)":"០% (ក្នុងរយៈពេលលើកលែង) | ២០% (ផុតកំណត់)"}<br />
-        <strong style={{ color: gold2 }}>{lang==="en"?"Incentive":"ការលើកទឹកចិត្ត"}:</strong> {lang==="en"?"Up to 9 years tax holiday. If incentive years remain > 0 → 0% rate.":"លើកលែងពន្ធរហូត ៩ឆ្នាំ។ បើនៅសល់ឆ្នាំលើកលែង > ០ → ០% ។"}
-      </div>
       <div className="card-hover" style={calcCard}>
-        <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"QIP Projects":"គម្រោង QIP"}</div>
-        <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
-          <thead>
-            <tr>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Project Name":"ឈ្មោះគម្រោង"}</th>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"right",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Amount (KHR)":"ទឹកប្រាក់ (រៀល)"}</th>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Incentive Years":"ឆ្នាំលើកលែង"}</th>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"right",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Tax":"ពន្ធ"}</th>
-              <th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p, i) => {
-              const amt = parseFloat(p.amount) || 0;
-              const yrs = parseInt(p.incentiveYears) || 0;
-              const rate = yrs > 0 ? 0 : (amt > 0 ? 20 : 0);
-              const tax = amt * (rate / 100);
-              return (
-                <tr key={i}>
-                  <td style={{padding:"4px 3px"}}><input className="input-focus" style={{...input,padding:"5px 6px",fontSize:"0.7rem"}} placeholder={lang==="en"?"e.g. Solar Farm":"ឧ. រោងចក្រ"} value={p.name} onChange={e=>updateProject(i,"name",e.target.value)} /></td>
-                  <td style={{padding:"4px 3px"}}><input className="input-focus" style={{...input,padding:"5px 6px",fontSize:"0.7rem",textAlign:"right"}} type="number" placeholder="e.g. 10000000" value={p.amount} onChange={e=>updateProject(i,"amount",e.target.value)} /></td>
-                  <td style={{padding:"4px 3px"}}><input className="input-focus" style={{...input,padding:"5px 6px",fontSize:"0.7rem",textAlign:"center"}} type="number" min="0" max="9" placeholder="0" value={p.incentiveYears} onChange={e=>updateProject(i,"incentiveYears",e.target.value)} /></td>
-                  <td style={{padding:"4px 3px",textAlign:"center",color:rate===0?green:gold,fontWeight:700,fontSize:"0.75rem"}}>{amt > 0 ? rate + "%" : "—"}</td>
-                  <td style={{padding:"4px 3px",textAlign:"right",color:red,fontWeight:700,fontSize:"0.75rem"}}>{amt > 0 ? fmt(tax) : "—"}</td>
-                  <td style={{padding:"4px 3px",textAlign:"center"}}>
-                    {projects.length > 1 && <span onClick={()=>removeProject(i)} style={{color:"rgba(230,57,70,0.7)",cursor:"pointer",fontSize:"0.9rem",fontWeight:700}}>✕</span>}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div style={{display:"flex",gap:8,marginTop:8}}>
-          <button style={{...btn,padding:"6px 14px",fontSize:"0.72rem",marginTop:0,width:"auto"}} onClick={addProject}>{lang==="en"?"+ Add Project":"+ បន្ថែមគម្រោង"}</button>
-          <button style={{...btn,padding:"6px 14px",fontSize:"0.72rem",marginTop:0,width:"auto"}} onClick={doCalc}>{lang==="en"?"Calculate Total":"គណនាសរុប"}</button>
+        <div style={{fontSize:"0.88rem",fontWeight:700,color:gold2,marginBottom:14}}>
+          {lang==="en"?"QIP Tax Calculator":"ម៉ាស៊ីនគិតពន្ធ QIP"}
         </div>
-        {result && <div className="result-fade" style={{...resultBox,marginTop:12}}>
-          {result.projects.filter(r => r.amount > 0).map((r, i) => (
-            <Row key={i} label={`${r.name || (lang==="en"?"Project":"គម្រោង")+" "+(i+1)} (${r.rate}%)`} value={fmt(r.tax)} color={r.tax > 0 ? "red" : "green"} />
-          ))}
-          <div style={{borderTop:`2px solid ${gold}`,margin:"6px 0"}} />
-          <Row label={lang==="en"?"Total QIP Tax":"ពន្ធ QIP សរុប"} value={fmt(result.totalTax)} color="red" />
-        </div>}
-      </div>
-      <div style={grid}>
-        <div className="card-hover" style={calcCard}>
-          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Example":"ឧទាហរណ៍"}</div>
-          <div style={{fontSize:"0.75rem",color:"#C5D5E8",lineHeight:2}}>
-            <div><strong style={{color:gold2}}>{lang==="en"?"Project 1":"គម្រោង ១"}:</strong> {lang==="en"?"10,000,000 KHR, incentive 5 yrs → 0% = 0":"១០,០០០,០០០៛, លើកលែង ៥ឆ្នាំ → ០% = ០"}</div>
-            <div><strong style={{color:gold2}}>{lang==="en"?"Project 2":"គម្រោង ២"}:</strong> {lang==="en"?"20,000,000 KHR, expired → 20% = 4,000,000":"២០,០០០,០០០៛, ផុតកំណត់ → ២០% = ៤,០០០,០០០"}</div>
-            <div style={{borderTop:`1px solid ${border}`,margin:"4px 0"}} />
-            <div><strong style={{color:gold}}>{lang==="en"?"Total = 4,000,000 KHR":"សរុប = ៤,០០០,០០០៛"}</strong></div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div>
+            <label style={{...label,marginTop:0}}>{lang==="en"?"Project Name":"ឈ្មោះគម្រោង"}</label>
+            <input className="input-focus" style={input} placeholder={lang==="en"?"e.g. Food Processing":"ឧ. កែច្នៃម្ហូប"} value={project.name} onChange={e=>update("name",e.target.value)} />
+          </div>
+          <div>
+            <label style={{...label,marginTop:0}}>{lang==="en"?"Group":"ក្រុម"}</label>
+            <select style={select} value={project.group} onChange={e=>update("group",e.target.value)}>
+              <option value="1">{lang==="en"?"1 — High-tech (9yr)":"១ — បច្ចេកវិទ្យាខ្ពស់ (៩ឆ្នាំ)"}</option>
+              <option value="2">{lang==="en"?"2 — Medium (6yr)":"២ — កម្រិតមធ្យម (៦ឆ្នាំ)"}</option>
+              <option value="3">{lang==="en"?"3 — Low (3yr)":"៣ — កម្រិតទាប (៣ឆ្នាំ)"}</option>
+            </select>
+          </div>
+          <div>
+            <label style={{...label,marginTop:0}}>{lang==="en"?"Operating Year":"ឆ្នាំដំណើរការ"}</label>
+            <input className="input-focus" style={input} type="number" min="1" placeholder={lang==="en"?"e.g. 1, 7, 13":"ឧ. ១, ៧, ១៣"} value={project.year} onChange={e=>update("year",e.target.value)} />
+          </div>
+          <div>
+            <label style={{...label,marginTop:0}}>{lang==="en"?"Annual Profit (KHR)":"ប្រាក់ចំណេញប្រចាំឆ្នាំ"}</label>
+            <input className="input-focus" style={input} type="number" placeholder={lang==="en"?"e.g. 10000000":"ឧ. ១០០០០០០០"} value={project.profit} onChange={e=>update("profit",e.target.value)} />
           </div>
         </div>
-        <div className="card-hover" style={calcCard}>
-          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{lang==="en"?"Rate Reference":"តារាងអត្រា"}</div>
-          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.72rem"}}>
-            <thead>
-              <tr><th style={{color:gold,padding:"4px 6px",textAlign:"left",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Status":"ស្ថានភាព"}</th><th style={{color:gold,padding:"4px 6px",textAlign:"center",borderBottom:`1px solid ${border}`,fontWeight:700}}>{lang==="en"?"Rate":"អត្រា"}</th></tr>
-            </thead>
-            <tbody>
-              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>{lang==="en"?"Within incentive period (holiday)":"ក្នុងរយៈពេលលើកលែង"}</td><td style={{padding:"5px 6px",textAlign:"center",color:green,fontWeight:700}}>0%</td></tr>
-              <tr><td style={{padding:"5px 6px",color:"#C5D5E8"}}>{lang==="en"?"After incentive period expires":"ក្រោយផុតកំណត់"}</td><td style={{padding:"5px 6px",textAlign:"center",color:gold,fontWeight:700}}>20%</td></tr>
-            </tbody>
-          </table>
-          <div style={hint}>{lang==="en"?"Up to 9 years of tax holiday for QIP.":"លើកលែងពន្ធរហូត ៩ឆ្នាំសម្រាប់ QIP ។"}</div>
+
+        {yr > 0 && amt > 0 && phaseData && (
+          <div className="result-fade" style={{marginTop:14,background:"rgba(0,0,0,0.25)",border:`1px solid ${phaseData.bar}40`,borderRadius:10,padding:"14px 18px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+              <span style={{padding:"4px 14px",borderRadius:20,background:phaseData.color+"20",border:`1px solid ${phaseData.color}`,color:phaseData.color,fontWeight:700,fontSize:"0.78rem",whiteSpace:"nowrap"}}>
+                {phaseData.label}
+              </span>
+              <span style={{color:muted,fontSize:"0.75rem"}}>
+                {lang==="en"?"Group":"ក្រុម"} {project.group} · {lang==="en"?"Year":"ឆ្នាំ"} {yr} · {lang==="en"?"Holiday":"លើកលែង"} {hYears}{lang==="en"?"yr":"ឆ្នាំ"}
+              </span>
+            </div>
+            <div style={{display:"flex",gap:24,marginTop:10,flexWrap:"wrap"}}>
+              <div><div style={{fontSize:"0.6rem",color:muted,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="en"?"Tax Rate":"អត្រាពន្ធ"}</div><div style={{fontSize:"1.1rem",fontWeight:800,color:rate===0?green:rate<20?gold:red}}>{rate}%</div></div>
+              <div><div style={{fontSize:"0.6rem",color:muted,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="en"?"Tax Amount":"ចំនួនពន្ធ"}</div><div style={{fontSize:"1.1rem",fontWeight:800,color:tax===0?green:"#E63946"}}>{fmt(tax)}</div></div>
+              <div><div style={{fontSize:"0.6rem",color:muted,textTransform:"uppercase",letterSpacing:"0.05em"}}>{lang==="en"?"Net After Tax":"នៅសល់ក្រោយពន្ធ"}</div><div style={{fontSize:"1.1rem",fontWeight:800,color:white}}>{fmt(amt - tax)}</div></div>
+            </div>
+          </div>
+        )}
+
+        <div style={{marginTop:18}}>
+          <div style={{fontSize:"0.65rem",color:muted,fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em"}}>
+            {lang==="en"?"Tax Timeline for Group":"ដំណាក់កាលពន្ធសម្រាប់ក្រុម"} {project.group} ({hYears}{lang==="en"?"yr holiday":"ឆ្នាំលើកលែង"})
+          </div>
+          <div style={{display:"flex",height:28,borderRadius:6,overflow:"hidden",position:"relative"}}>
+            {segments.map((s, i) => {
+              const w = s.years / totalYears * 100;
+              const isActive = yr > 0 && yr >= s.start && yr <= s.end;
+              return (
+                <div key={i} style={{width:w+"%",background:s.color,opacity:isActive?1:0.5,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",fontWeight:700,color:"#fff",transition:"all 0.3s",position:"relative"}}>
+                  {s.label}
+                  {isActive && <div style={{position:"absolute",top:-6,width:0,height:0,borderLeft:"6px solid transparent",borderRight:"6px solid transparent",borderTop:`6px solid ${s.color}`}} />}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
+            <span style={{fontSize:"0.55rem",color:muted}}>1</span>
+            <span style={{fontSize:"0.55rem",color:muted}}>{hYears}</span>
+            <span style={{fontSize:"0.55rem",color:muted}}>{hYears+2}</span>
+            <span style={{fontSize:"0.55rem",color:muted}}>{hYears+4}</span>
+            <span style={{fontSize:"0.55rem",color:muted}}>{hYears+6}</span>
+            <span style={{fontSize:"0.55rem",color:muted}}>+</span>
+          </div>
         </div>
       </div>
+
+      {/* Test Cases */}
+      <div style={{marginTop:16}}>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+          <span style={{color:gold2,fontSize:"0.72rem",fontWeight:700}}>{lang==="en"?"Test Cases (Group 2, Profit=10M)":"ករណីសាកល្បង (ក្រុមទី២, ប្រាក់=១០លាន)"}</span>
+          <button style={{padding:"4px 12px",borderRadius:12,border:`1px solid ${green}`,background:"rgba(39,174,96,0.1)",color:green,cursor:"pointer",fontSize:"0.68rem",fontWeight:600}} onClick={()=>{update("group","2");update("year","1");update("profit","10000000");update("name",lang==="en"?"Food Processing Khmer":"ក្រុមហ៊ុន អាហារកែច្នៃ ខ្មែរ")}}>
+            {lang==="en"?"Test 1: Holiday (Yr 1)":"តេស្ត ១: លើកលែង (ឆ្នាំទី១)"}
+          </button>
+          <button style={{padding:"4px 12px",borderRadius:12,border:`1px solid ${gold}`,background:"rgba(212,168,67,0.1)",color:gold,cursor:"pointer",fontSize:"0.68rem",fontWeight:600}} onClick={()=>{update("group","2");update("year","7");update("profit","10000000");update("name",lang==="en"?"Food Processing Khmer":"ក្រុមហ៊ុន អាហារកែច្នៃ ខ្មែរ")}}>
+            {lang==="en"?"Test 2: Transition (Yr 7)":"តេស្ត ២: អន្តរកាល (ឆ្នាំទី៧)"}
+          </button>
+          <button style={{padding:"4px 12px",borderRadius:12,border:`1px solid ${red}`,background:"rgba(230,57,70,0.1)",color:red,cursor:"pointer",fontSize:"0.68rem",fontWeight:600}} onClick={()=>{update("group","2");update("year","13");update("profit","10000000");update("name",lang==="en"?"Food Processing Khmer":"ក្រុមហ៊ុន អាហារកែច្នៃ ខ្មែរ")}}>
+            {lang==="en"?"Test 3: Full Tax (Yr 13)":"តេស្ត ៣: ពន្ធពេញ (ឆ្នាំទី១៣)"}
+          </button>
+        </div>
+        {yr > 0 && (
+          <div style={{marginTop:10,padding:"10px 14px",background:"rgba(0,0,0,0.2)",borderRadius:8,border:`1px solid ${border}`,fontSize:"0.72rem",lineHeight:1.8,color:"#C5D5E8"}}>
+            <strong style={{color:gold2}}>{lang==="en"?"Result":"លទ្ធផល"}:</strong> {lang==="en"?"Group":"ក្រុម"} {project.group} · {lang==="en"?"Year":"ឆ្នាំ"} {yr} → {lang==="en"?"Rate":"អត្រា"} <strong style={{color:rate===0?green:rate<20?gold:red}}>{rate}%</strong> · {lang==="en"?"Tax":"ពន្ធ"} <strong style={{color:tax===0?green:"#E63946"}}>{fmt(tax)}</strong> · {lang==="en"?"Formula":"រូបមន្ត"} {fmt(amt)} × {rate}% = {fmt(tax)}
+          </div>
+        )}
+      </div>
+
+      {/* Rate Table */}
+      <div style={{marginTop:20}}>
+        <div className="card-hover" style={calcCard}>
+          <div style={{fontSize:"0.88rem",fontWeight:700,color:gold2,marginBottom:14}}>
+            {lang==="en"?"Rate Schedule for Selected Group":"តារាងអត្រាសម្រាប់ក្រុមដែលបានជ្រើសរើស"}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
+            {[
+              {period:lang==="en"?"Tax Holiday":"លើកលែងពន្ធ", yrRange:`1 – ${hYears}`, pct:"0%", eff:"0%", c:green},
+              {period:lang==="en"?"Transition Yr 1-2":"អន្តរកាល ឆ្នាំទី១-២", yrRange:`${hYears+1} – ${hYears+2}`, pct:"25%", eff:"5%", c:"#F0C96A"},
+              {period:lang==="en"?"Transition Yr 3-4":"អន្តរកាល ឆ្នាំទី៣-៤", yrRange:`${hYears+3} – ${hYears+4}`, pct:"50%", eff:"10%", c:gold},
+              {period:lang==="en"?"Transition Yr 5-6":"អន្តរកាល ឆ្នាំទី៥-៦", yrRange:`${hYears+5} – ${hYears+6}`, pct:"75%", eff:"15%", c:"#C58A20"},
+              {period:lang==="en"?"Full Rate":"អត្រាពេញ", yrRange:`${hYears+7} +`, pct:"100%", eff:"20%", c:red},
+            ].map((r, i) => (
+              <div key={i} style={{
+                background:phase === ["holiday","transition_early","transition_mid","transition_late","full"][i] ? r.c+"15" : "rgba(255,255,255,0.03)",
+                border:`1px solid ${phase === ["holiday","transition_early","transition_mid","transition_late","full"][i] ? r.c : border}`,
+                borderRadius:8, padding:"10px 14px", transition:"all 0.3s"
+              }}>
+                <div style={{fontSize:"0.7rem",color:muted,marginBottom:2}}>{r.yrRange}</div>
+                <div style={{fontWeight:700,fontSize:"0.82rem",color:r.c}}>{r.eff}</div>
+                <div style={{fontSize:"0.6rem",color:muted}}>{r.period} — {r.pct}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function QIPTaxTab({ lang }) {
+  const [projects, setProjects] = useState([]);
+  const [activeId, setActiveId] = useState(null);
+
+  const addProject = () => {
+    const id = Date.now();
+    const p = { id, name: lang==="en"?`Project ${projects.length+1}`:`គម្រោងទី ${projects.length+1}`, group: "2", year: "", profit: "" };
+    setProjects([...projects, p]);
+    setActiveId(id);
+  };
+
+  const updateProject = (id, updated) => {
+    setProjects(projects.map(p => p.id === id ? updated : p));
+  };
+
+  const removeProject = (id) => {
+    const next = projects.filter(p => p.id !== id);
+    setProjects(next);
+    if (activeId === id) setActiveId(next.length > 0 ? next[next.length-1].id : null);
+  };
+
+  const activeProject = projects.find(p => p.id === activeId);
+
+  return (
+    <div>
+      <div style={title}>{lang==="en"?"QIP Tax (Qualified Investment Project)":"ពន្ធ QIP (គម្រោងវិនិយោគមានលក្ខណៈសម្បត្តិគ្រប់គ្រាន់)"}</div>
+      <div style={subt}>{lang==="en"?"Tax for QIP approved by CDC. 0% during tax holiday, then graduated rates (5%→10%→15%→20%) across a 6-year transition.":"ពន្ធសម្រាប់គម្រោងវិនិយោគដែលអនុម័តដោយ CDC ។ ០% អំឡុងពេលលើកលែង បន្ទាប់មកអត្រាអន្តរកាល (៥%→១០%→១៥%→២០%) ។"}</div>
+
+      {/* Group Info */}
+      <div style={box}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
+          <div style={{borderLeft:`3px solid ${gold}`,paddingLeft:10}}>
+            <strong style={{color:gold2,fontSize:"0.8rem"}}>{lang==="en"?"Group 1":"ក្រុមទី១"}</strong>
+            <div style={{color:"#B8C8DC",fontSize:"0.72rem",lineHeight:1.6}}>
+              {lang==="en"?"High-tech, green energy, R&D":"ឧស្សាហកម្មបច្ចេកវិទ្យាខ្ពស់ ថាមពលបៃតង R&D"}
+            </div>
+            <div style={{color:green,fontWeight:700,fontSize:"0.85rem"}}>{lang==="en"?"9-year holiday":"លើកលែង ៩ឆ្នាំ"}</div>
+          </div>
+          <div style={{borderLeft:`3px solid ${gold}`,paddingLeft:10}}>
+            <strong style={{color:gold2,fontSize:"0.8rem"}}>{lang==="en"?"Group 2":"ក្រុមទី២"}</strong>
+            <div style={{color:"#B8C8DC",fontSize:"0.72rem",lineHeight:1.6}}>
+              {lang==="en"?"Medium processing, tourism":"កែច្នៃកម្រិតមធ្យម ទេសចរណ៍"}
+            </div>
+            <div style={{color:green,fontWeight:700,fontSize:"0.85rem"}}>{lang==="en"?"6-year holiday":"លើកលែង ៦ឆ្នាំ"}</div>
+          </div>
+          <div style={{borderLeft:`3px solid ${gold}`,paddingLeft:10}}>
+            <strong style={{color:gold2,fontSize:"0.8rem"}}>{lang==="en"?"Group 3":"ក្រុមទី៣"}</strong>
+            <div style={{color:"#B8C8DC",fontSize:"0.72rem",lineHeight:1.6}}>
+              {lang==="en"?"Low processing (garment), agro":"កែច្នៃកម្រិតទាប (កាត់ដេរ), កសិផល"}
+            </div>
+            <div style={{color:green,fontWeight:700,fontSize:"0.85rem"}}>{lang==="en"?"3-year holiday":"លើកលែង ៣ឆ្នាំ"}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Project Tabs */}
+      <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:16,alignItems:"stretch"}}>
+        {projects.map(p => {
+          const isActive = p.id === activeId;
+          const yr = parseInt(p.year) || 0;
+          const showDot = yr > 0 && parseFloat(p.profit) > 0;
+          return (
+            <div key={p.id} style={{
+              display:"flex",alignItems:"center",gap:6,
+              padding:"7px 10px 7px 14px",
+              borderRadius:"8px 8px 0 0",
+              cursor:"pointer",
+              background:isActive?"rgba(212,168,67,0.15)":"rgba(255,255,255,0.04)",
+              border:`1px solid ${isActive?gold:"transparent"}`,
+              borderBottom:isActive?`1px solid ${navy}`:"1px solid transparent",
+              fontSize:"0.78rem",fontWeight:isActive?700:500,color:isActive?gold:muted,
+              transition:"all 0.15s"
+            }} onClick={() => setActiveId(p.id)}>
+              {showDot && <span style={{width:6,height:6,borderRadius:"50%",background:green}} />}
+              <span style={{maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name || (lang==="en"?"Untitled":"គ្មានឈ្មោះ")}</span>
+              <span style={{fontSize:"0.6rem",opacity:0.5,marginLeft:2}}>{p.group}</span>
+              <span onClick={e=>{e.stopPropagation();removeProject(p.id);}} style={{fontSize:"0.75rem",cursor:"pointer",opacity:0.5,padding:"0 2px",lineHeight:1}}>×</span>
+            </div>
+          );
+        })}
+        {/* Add Button */}
+        <div onClick={addProject} style={{
+          display:"flex",alignItems:"center",justifyContent:"center",
+          padding:"7px 12px",cursor:"pointer",
+          borderRadius:"8px 8px 0 0",
+          border:`1px dashed ${border}`,
+          color:muted,fontSize:"0.82rem",fontWeight:600,
+          transition:"all 0.15s"
+        }}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor=gold;e.currentTarget.style.color=gold;e.currentTarget.style.background="rgba(212,168,67,0.08)"}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor=border;e.currentTarget.style.color=muted;e.currentTarget.style.background="transparent"}}
+        >+ {lang==="en"?"Add Project":"បន្ថែមគម្រោង"}</div>
+      </div>
+
+      {!activeProject ? (
+        <div style={{textAlign:"center",padding:40,color:muted,fontSize:"0.85rem"}}>
+          {lang==="en"?"Click \"+ Add Project\" to start calculating QIP tax for your projects.":"ចុច \"+ បន្ថែមគម្រោង\" ដើម្បីចាប់ផ្តើមគណនាពន្ធ QIP សម្រាប់គម្រោងរបស់អ្នក។"}
+        </div>
+      ) : (
+        <QIPProjectCard project={activeProject} onUpdate={updateProject} onRemove={removeProject} lang={lang} />
+      )}
     </div>
   );
 }

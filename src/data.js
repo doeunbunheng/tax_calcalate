@@ -11,7 +11,7 @@ export const T = {
       vat: "VAT", special: "Special Tax", withholding: "Withholding Tax",
       lighting: "Public Lighting Tax", accommodation: "Accommodation Tax",
       dividend: "Dividend Tax", minimum: "Minimum Tax", rent: "Rent & Land Tax",
-      landtransfer: "Land Transfer Tax", property: "Property Tax",
+      landtransfer: "Stamp Tax", property: "Property Tax",
       annual: "Annual Tax & Prepayment",
     },
     nav: { home: "Home", about: "About Taxes", allTaxes: "All Taxes", calculator: "Calculator" },
@@ -263,7 +263,7 @@ export const T = {
       cat2Title: "ពន្ធប្រយោល",
       cat2Desc: "ពន្ធលើទំនិញ និងសេវា រួមមាន VAT អាករពិសេស ពន្ធបំភ្លឺសាធារណៈ និងអាករស្នាក់នៅ។",
       cat3Title: "ពន្ធលើប្រតិបត្តិការ",
-      cat3Desc: "ពន្ធលើអចលនទ្រព្យ និងប្រតិបត្តិការសកម្មភាព រួមមានពន្ធផ្ទេរដី ពន្ធអចលនទ្រព្យ និងពន្ធលើប្រាក់ជួល។",
+      cat3Desc: "ពន្ធលើអចលនទ្រព្យ និងប្រតិបត្តិការសកម្មភាព រួមមានពន្ធប្រថាប់ត្រា ពន្ធអចលនទ្រព្យ និងពន្ធលើប្រាក់ជួល។",
       cat4Title: "ពន្ធបង់ជាមុន និងកាត់ទុក",
       cat4Desc: "ពន្ធដែលកាត់នៅប្រភព ឬបង់ជាមុន រួមមានប្រាក់រំដោះពន្ធ និងពន្ធកាត់ទុក។",
       howTitle: "របៀបប្រើប្រាស់ម៉ាស៊ីនគិតពន្ធនេះ",
@@ -542,13 +542,35 @@ export function calcSpecialImport(cif, duty, r) { const base = cif + (parseFloat
 export function calcCorporateIncomeTax(p) { const tax = p*0.20; return { tax, rate:20, net: p-tax }; }
 export function calcNaturalResourceTax(p) { const tax = p*0.30; return { tax, rate:30 }; }
 export function calcQIPTax(projects) {
+  const GROUP_YEARS = { 1: 9, 2: 6, 3: 3 };
   const results = (projects || []).map(p => {
     const amount = parseFloat(p.amount) || 0;
-    const years = parseInt(p.incentiveYears) || 0;
-    const inIncentive = years > 0;
-    const rate = inIncentive ? 0 : 20;
+    const group = parseInt(p.group) || 2;
+    const currentYear = parseInt(p.currentYear) || 1;
+    const holidayYears = GROUP_YEARS[group] || 6;
+    const transitionStart = holidayYears + 1;
+    const transitionEnd = holidayYears + 6;
+    let rate, phase;
+    if (currentYear <= holidayYears) {
+      rate = 0;
+      phase = "holiday";
+    } else if (currentYear <= transitionStart + 1) {
+      rate = 5;   // 25% of 20%
+      phase = "transition_early";
+    } else if (currentYear <= transitionStart + 3) {
+      rate = 10;  // 50% of 20%
+      phase = "transition_mid";
+    } else if (currentYear <= transitionEnd) {
+      rate = 15;  // 75% of 20%
+      phase = "transition_late";
+    } else {
+      rate = 20;
+      phase = "full";
+    }
     const tax = amount * (rate / 100);
-    return { name: p.name || "", amount, incentiveYears: years, inIncentive, rate, tax };
+    const minTaxExempt = p.minTaxExempt === true;
+    const prepayExempt = p.prepayExempt === true;
+    return { name: p.name || "", amount, group, currentYear, holidayYears, phase, rate, tax, minTaxExempt, prepayExempt };
   });
   const totalTax = results.reduce((s, r) => s + r.tax, 0);
   return { projects: results, totalTax };
@@ -581,7 +603,7 @@ export const TAXES = [
   { id: "dividend", en: "Dividend Tax", kh: "ពន្ធភាគលាភ", cat: "income", icon: "", rate: "0%–20%", due: "When distributed", formulaEn: "Dividend × Rate", formulaKh: "ភាគលាភ × អត្រា", defEn: "Tax on profit distributed as dividends.", defKh: "ភាគលាភ គឺជាប្រាក់ ឬទ្រព្យសម្បត្តិដែលក្រុមហ៊ុនចែកឲ្យម្ចាស់ភាគហ៊ុន បន្ទាប់ពីក្រុមហ៊ុនមានប្រាក់ចំណេញ។ ពន្ធភាគលាភ គឺជាពន្ធដែលពាក់ព័ន្ធនឹងការចែកប្រាក់ចំណេញទៅម្ចាស់ភាគហ៊ុន។" },
   { id: "minimum", en: "Minimum Tax", kh: "ពន្ធអប្បបរមា", cat: "income", icon: "", rate: "1%", due: "Annual filing", formulaEn: "Revenue (excl. VAT) × 1%", formulaKh: "ចំណូលមិនរួម VAT × ១%", defEn: "Ensures enterprises pay at least 1% of annual turnover.", defKh: "ពន្ធអប្បបរមា គឺជាពន្ធដែលគណនាលើផលរបរប្រចាំឆ្នាំមិនរួម VAT។ វាត្រូវបានប្រើសម្រាប់ប្រៀបធៀបជាមួយពន្ធលើប្រាក់ចំណូល។ អត្រាគឺ ១% នៃផលរបរប្រចាំឆ្នាំមិនរួម VAT។" },
   { id: "rent", en: "Rent & Land Tax", kh: "ពន្ធជួលដីនិងអចលន", cat: "transaction", icon: "", rate: "10%", due: "Monthly", formulaEn: "Rental Income × 10%", formulaKh: "ប្រាក់ជួល × ១០%", defEn: "10% on rental income.", defKh: "ពន្ធឈ្នួលផ្ទះ និងដី គឺជាពន្ធដែលគិតលើប្រាក់ចំណូលពីការជួលផ្ទះ ដី អគារ ឬអចលនទ្រព្យផ្សេងៗ។ ជាទូទៅ វាត្រូវបានគិតក្នុងអត្រា ១០% លើប្រាក់ជួល។" },
-  { id: "landtransfer", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% on sale price when transferring land.", defKh: "ពន្ធប្រថាប់ត្រា គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
+  { id: "landtransfer", en: "Stamp Tax", kh: "ពន្ធប្រថាប់ត្រា", cat: "transaction", icon: "", rate: "4%", due: "At transfer", formulaEn: "Sale Price × 4%", formulaKh: "តម្លៃ × ៤%", defEn: "4% stamp duty on land/property transfer.", defKh: "ពន្ធប្រថាប់ត្រា គឺជាពន្ធដែលត្រូវបង់នៅពេលមានការផ្ទេរកម្មសិទ្ធិដីពីម្ចាស់ចាស់ទៅម្ចាស់ថ្មី។ ជាទូទៅអ្នកទិញ ឬអ្នកទទួលកម្មសិទ្ធិថ្មីជាអ្នកបង់ពន្ធនេះ។" },
   { id: "property", en: "Property Tax", kh: "ពន្ធអចលនទ្រព្យ", cat: "transaction", icon: "", rate: "0.1%", due: "September 30", formulaEn: "(Total Value × 80% − 100M KHR) × 0.1%", formulaKh: "(តម្លៃ × ៨០% − ១០០លាន) × ០.១%", defEn: "Annual tax on immovable property. Base = 80% of value − 100M KHR exemption.", defKh: "ពន្ធលើអចលនទ្រព្យ គឺជាពន្ធប្រចាំឆ្នាំលើអចលនវត្ថុដូចជា ដី និងអគារ។ មូលដ្ឋានគិតពន្ធ = ៨០% នៃតម្លៃសរុប − ១០០លានរៀល។" },
 
   { id: "corporate", en: "Corporate Income Tax", kh: "ពន្ធនីតិបុគ្គល", cat: "income", icon: "", rate: "20%", due: "Annual filing", formulaEn: "Taxable Income × 20%", formulaKh: "ចំណូលជាប់ពន្ធ × ២០%", defEn: "Tax on net profit of companies.", defKh: "ពន្ធលើប្រាក់ចំណូលនីតិបុគ្គល គឺជាពន្ធដែលគណនាលើប្រាក់ចំណេញជាប់ពន្ធរបស់ក្រុមហ៊ុន ឬនីតិបុគ្គល។ ប្រាក់ចំណេញជាប់ពន្ធអាចខុសពីប្រាក់ចំណេញក្នុងគណនេយ្យ ព្រោះត្រូវមានការកែតម្រូវតាមច្បាប់ពន្ធ។" },
