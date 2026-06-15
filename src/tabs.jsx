@@ -196,30 +196,21 @@ export function SalaryTab({ lang }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 2. PREPAYMENT
+// 2. PREPAYMENT — simple: input amount → month → tax
 // ═══════════════════════════════════════════════════════════
 export function PrepaymentTab({ lang }) {
   const t = T[lang].prepayment;
-  const [incomes, setIncomes] = useState(Array(12).fill(""));
-  const [expenses, setExpenses] = useState("");
+  const [amount, setAmount] = useState("");
+  const [monthIdx, setMonthIdx] = useState(0);
   const [result, setResult] = useState(null);
-  const handleIncome = (i, v) => { const c = [...incomes]; c[i] = v; setIncomes(c); };
-  const monthlyResults = useMemo(() => incomes.map(v => { const r = parseFloat(v) || 0; return r > 0 ? calcPrepaymentTax(r) : null; }), [incomes]);
-  const totals = useMemo(() => {
-    let rev = 0, base = 0, tax = 0;
-    monthlyResults.forEach((r, i) => { if (r) { rev += parseFloat(incomes[i]) || 0; base += r.base; tax += r.tax; } });
-    return { rev, base, tax };
-  }, [monthlyResults, incomes]);
+
   const doCalc = () => {
-    const vals = incomes.map(v => parseFloat(v) || 0);
-    const exp = parseFloat(expenses) || 0;
-    const totRev = vals.reduce((s, v) => s + v, 0);
-    const netProfit = (totRev / 1.10) - exp;
-    setResult({
-      monthly: { rev: totals.rev, base: totals.base, prepay: totals.tax },
-      annual: { netProfit, incomeTax: netProfit > 0 ? netProfit * 0.20 : 0, minimumTax: totals.base * 0.01, prepayTotal: totals.tax },
-    });
+    const amt = parseFloat(amount) || 0;
+    if (amt <= 0) return;
+    const r = calcPrepaymentTax(amt);
+    setResult({ ...r, month: monthIdx });
   };
+
   return (
     <div>
       <div style={title}>{t.title}</div>
@@ -230,51 +221,48 @@ export function PrepaymentTab({ lang }) {
       </div>
       <div className="card-hover" style={calcCard}>
         <div style={{ fontSize: "0.88rem", fontWeight: 700, color: gold2, marginBottom: 14 }}>{t.calcTitle}</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 4 }}>
-          {t.monthLabels.map((ml, i) => (
-            <div key={i}>
-              <label style={{ ...label, marginTop: 4, fontSize: "0.6rem" }}>{ml}</label>
-              <input className="input-focus" style={input} type="number" placeholder="0" value={incomes[i]} onChange={e => handleIncome(i, e.target.value)} />
-            </div>
-          ))}
-        </div>
-        <label style={label}>{t.expensesLabel}</label>
-        <input className="input-focus" style={input} type="number" placeholder="0" value={expenses} onChange={e => setExpenses(e.target.value)} />
-        <button style={btn} onClick={doCalc}>{t.calcBtn}</button>
-        {result && totals.base > 0 && <div className="result-fade" style={{ marginTop: 16 }}>
-          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: gold2, marginBottom: 10 }}>{lang==="en"?"Monthly Prepayment Breakdown":"តារាងរំដោះពន្ធប្រចាំខែ"}</div>
-          <Table rows={[
-            [t.monthCol, t.revenueCol, t.baseCol, t.prepaymentCol],
-            ...t.monthLabels.map((ml, i) => {
-              const r = monthlyResults[i];
-              const val = parseFloat(incomes[i]) || 0;
-              return [ml, fmt(val), r ? fmt(r.base) : "—", r ? fmt(r.tax) : "—"];
-            }),
-            [t.totalRow, fmt(result.monthly.rev), fmt(result.monthly.base), fmt(result.monthly.prepay)],
-          ]} />
-          <div style={{ borderTop: `2px solid ${gold}`, margin: "12px 0" }} />
-          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: gold2, marginBottom: 10 }}>{t.annualTitle}</div>
-          <Row label={t.netProfit} value={fmt(result.annual.netProfit)} color={result.annual.netProfit < 0 ? "red" : "green"} />
-          <Row label={lang==="en"?"Status":"ស្ថានភាព"} value={result.annual.netProfit < 0 ? t.lossStatus : t.profitStatus} color={result.annual.netProfit < 0 ? "red" : "green"} />
-          {result.annual.netProfit > 0 && <Row label={t.incomeTax} value={fmt(result.annual.incomeTax)} />}
-          <Row label={t.minimumTax} value={fmt(result.annual.minimumTax)} color="gold" />
-          <Row label={lang==="en"?"Prepayment Credit":"ឥណទានរំដោះពន្ធ"} value={"−" + fmt(result.annual.prepayTotal)} color="green" />
-          <div style={{ borderTop: `1px dashed ${border}`, margin: "8px 0" }} />
-          <Row label={t.finalPayable} value={fmt(Math.max(result.annual.incomeTax, result.annual.minimumTax) - result.annual.prepayTotal)} color={Math.max(result.annual.incomeTax, result.annual.minimumTax) - result.annual.prepayTotal > 0 ? "red" : "green"} />
-          <div style={{ ...hint, marginTop: 10, padding: "10px 12px", background: result.annual.netProfit < 0 ? "rgba(230,57,70,0.1)" : "rgba(39,174,96,0.1)", borderRadius: 8, border: `1px solid ${result.annual.netProfit < 0 ? red : green}`, fontSize: "0.75rem", lineHeight: 1.6 }}>
-            <strong style={{ color: result.annual.netProfit < 0 ? red : green }}>{result.annual.netProfit < 0 ? t.minTaxApplied : t.profitTaxApplied}</strong>
-            <div style={{ marginTop: 4, color: muted }}>{t.creditNote}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div>
+            <label style={{ ...label, marginTop: 0 }}>{lang==="en"?"Month":"ខែ"}</label>
+            <select style={select} value={monthIdx} onChange={e => setMonthIdx(parseInt(e.target.value))}>
+              {t.monthLabels.map((ml, i) => <option key={i} value={i}>{ml}</option>)}
+            </select>
           </div>
-        </div>}
+          <div>
+            <label style={{ ...label, marginTop: 0 }}>{lang==="en"?"Revenue (incl. VAT)":"ចំណូល (រួម VAT)"}</label>
+            <input className="input-focus" style={input} type="number" placeholder={lang==="en"?"e.g. 11000000":"ឧ. ១១០០០០០០"} value={amount} onChange={e => setAmount(e.target.value)} />
+          </div>
+        </div>
+        <button style={btn} onClick={doCalc}>{t.calcBtn}</button>
+        {result && (
+          <div className="result-fade" style={{ marginTop: 14, background: "rgba(0,0,0,0.25)", borderRadius: 10, padding: "14px 18px" }}>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: "0.6rem", color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t.monthCol}</div>
+                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: white }}>{t.monthLabels[result.month]}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.6rem", color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t.revenueCol}</div>
+                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: white }}>{fmt(parseFloat(amount))}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.6rem", color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t.baseCol}</div>
+                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: gold }}>{fmt(result.base)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.6rem", color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t.prepaymentCol}</div>
+                <div style={{ fontSize: "1.2rem", fontWeight: 800, color: red }}>{fmt(result.tax)}</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <div style={box}>
         <strong style={{ color: gold2 }}>{lang==="en"?"Example":"ឧទាហរណ៍"}:</strong><br />
         <div style={{ fontSize: "0.82rem", color: "#B8C8DC", lineHeight: 1.9, marginTop: 4 }}>
           <p>{t.exampleNote}</p>
-          <p><strong style={{ color: gold2 }}>{lang==="en"?"Base":"Base"}:</strong> 110,000,000 / 1.10 = 100,000,000 ៛</p>
-          <p><strong style={{ color: gold2 }}>{lang==="en"?"Prepayment Tax":"រំដោះពន្ធ"}:</strong> 100,000,000 × 1% = 1,000,000 ៛</p>
-          <p><strong style={{ color: gold2 }}>{lang==="en"?"Annual Net Profit":"ប្រាក់ចំណេញសុទ្ធ"}:</strong> {lang==="en"?"Total Revenue / 1.10 − Expenses":"ចំណូលសរុប / ១.១០ − ចំណាយ"}</p>
-          <p><strong style={{ color: gold2 }}>{lang==="en"?"If Loss":"បើខាតបង់"}:</strong> {lang==="en"?"Minimum Tax (1% of base) applies":"អនុវត្តពន្ធអប្បបរមា ១%"}</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"Base":"Base"}:</strong> 11,000,000 / 1.10 = 10,000,000 ៛</p>
+          <p><strong style={{ color: gold2 }}>{lang==="en"?"Tax":"ពន្ធ"}:</strong> 10,000,000 × 1% = 100,000 ៛</p>
         </div>
       </div>
     </div>
